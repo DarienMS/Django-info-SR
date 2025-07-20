@@ -11,14 +11,13 @@
 <body class="contenedor">
 
 	<div class="centrar">
-		<img src="{% static 'img/logo.png' %}" width="50px" height="50px">
-		<a href="{% url 'home' %}">IR AL HOME</a>
-		<a href="{% url 'nosotros' %}">IR A NOSOTROS</a>
-		<a href="{% url 'noticias:listar' %}">IR A NOTICIAS</a>
+		<a href="{% url 'home' %}">HOME</a>
+		<a href="{% url 'nosotros' %}">NOSOTROS</a>
+		<a href="{% url 'recetas:listar' %}">RECETAS</a>
 
 		{% if user.is_authenticated %}
 			<strong>Hola {{ user.username }}</strong>
-			<a href="{% url 'logout' %}">LOGOUT</a>
+			<a href="{% url 'logout' %}">Logout</a>
 		{% else %}
 			<a href="{% url 'login' %}">LOGIN</a>
 			<a href="{% url 'usuarios:registro' %}">Registrar</a>

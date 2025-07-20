@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}RECETAS{% endblock titulo %}
+
+{% block contenido %}
+	<h1>DETALLE DE LA RECETA</h1>
+		<img src="{{receta.imagen.url}}" width="500" height="500">
+		
+		<p>TITULO: {{receta.titulo}}</p>
+		
+		<p>FECHA: {{receta.fecha}}</p>
+		<p>CATEGORIA: {{receta.categoria_receta}}</p>
+		<p>CUERPO: {{receta.cuerpo}}</p>
+		<br><br>
+		<br>
+		<form method="POST" action="{% url 'recetas:comentar' %}">{% csrf_token %}
+			<textarea name="comentario" maxlength="1500"></textarea>
+			<input type="text" name="id_receta" value="{{receta.pk}}" hidden=""> 
+			<input type="submit" value="GUARDAR">
+		</form>
+		<br><br><br>
+		<h3>COMENTARIOS</h3>
+		{% for com in comentarios %}
+			{% if user == com.usuario %}
+				<a href="">borrar</a>
+			{% endif %}
+			<strong>FECHA:{{com.fecha}}</strong><br>
+			<strong>USUARIO:{{com.usuario}}</strong><br>
+			<p>{{com.texto}}</p>
+		{% endfor %}
+		<a href="{% url 'recetas:listar' %}">VOLVER</a>
+{% endblock contenido %}
+

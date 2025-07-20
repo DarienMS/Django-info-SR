@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block titulo %}RECETAS{% endblock titulo %}
+
+{% block contenido %}
+    <div class="submenu">
+        <a href="{% url 'recetas:listar' %}">TODAS</a>
+        {% for cat in categorias %}
+            <a href="?id={{cat.pk}}">{{cat.nombre}}</a>
+        {% endfor %}
+    </div>
+
+    <h1>LISTA DE RECETAS</h1>
+
+    {% for receta in recetas %}
+        <img src="{{receta.imagen.url}}" width="100" height="100">
+        <p><a href="{% url 'recetas:detalle' receta.pk %}">TITULO: {{receta.titulo}}</a></p>
+        <p>FECHA: {{receta.fecha}}</p>
+        <p>CATEGORIA: {{receta.categoria_receta}}</p>
+        <p>CUERPO: {{receta.cuerpo}}</p>
+        <br><br>
+    {% endfor %}
+{% endblock contenido %}
+
