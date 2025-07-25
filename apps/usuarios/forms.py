@@ -1,24 +1,31 @@
-from django import forms
+# usuarios/forms.py
 
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Usuario
+from .models import Usuario # Tu modelo de usuario personalizado
 
 class RegistroForm(UserCreationForm):
-    email = forms.EmailField(label='Correo', required=True)
-    first_name = forms.CharField(label='Nombre', required=True)
-    last_name = forms.CharField(label='Apellido', required=True)
-    password1 = forms.CharField(
-        label='Contraseña', widget=forms.PasswordInput, required=True)
-    password2 = forms.CharField(
-        label='Confirmar Contraseña', widget=forms.PasswordInput, required=True)
-
-    class Meta:
+    class Meta(UserCreationForm.Meta): # Opcional: heredar la Meta de UserCreationForm
         model = Usuario
         fields = [
             'first_name',
             'last_name',
             'username',
             'email',
-            'password1',
-            'password2'
+            # 'password' es el nombre del campo en el modelo,
+            # UserCreationForm se encarga de renderizar password1 y password2
         ]
+      
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Opcional: Personalizar labels o widgets si lo necesitas,
+        # pero para los campos que ya existen, Django toma el label del modelo.
+        self.fields['email'].required = True # Asegura que el email sea requerido, aunque tu modelo ya lo dice
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+
+        # Personalizar labels si quieres que sean diferentes a los del modelo
+        self.fields['username'].label = 'Nombre de Usuario'
+        self.fields['email'].label = 'Correo Electrónico'
+        self.fields['first_name'].label = 'Nombre'
+        self.fields['last_name'].label = 'Apellido'

@@ -2,35 +2,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>MI WEB| {% block titulo %}{% endblock titulo %}</title>
+    <title>MI WEB| {% block titulo %}{% endblock titulo %}</title>
 
-	<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
 </head>
 
 
 <body class="contenedor">
 
-	<div class="centrar">
-		<a href="{% url 'home' %}">HOME</a>
-		<a href="{% url 'nosotros' %}">NOSOTROS</a>
-		<a href="{% url 'recetas:listar' %}">RECETAS</a>
+    <div class="centrar">
+        <a href="{% url 'home' %}">HOME</a>
+        <a href="{% url 'nosotros' %}">NOSOTROS</a>
+        <a href="{% url 'recetas:listar' %}">RECETAS</a>
 
-		{% if user.is_authenticated %}
-			<strong>Hola {{ user.username }}</strong>
-			<a href="{% url 'logout' %}">Logout</a>
-		{% else %}
-			<a href="{% url 'login' %}">LOGIN</a>
-			<a href="{% url 'usuarios:registro' %}">Registrar</a>
-		{% endif %}
-		
-		
+        {% if user.is_authenticated %}
+            <strong>Bienvenido {{ user.username }}</strong>
+            {# usamos un <form> con un botón #}
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %} {#  para seguridad en peticiones POST! #}
+                <button type="submit" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1em; padding: 0;">
+                    Logout
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}">LOGIN</a>
+            <a href="{% url 'usuarios:registro' %}">Registrar</a>
+        {% endif %}
+        
+    </div>
 
-	</div>
-
-	<div class="bloque">
-	{% block contenido %}
-	
-	{% endblock contenido %}
-	</div>
+    <div class="bloque">
+    {% block contenido %}
+    
+    {% endblock contenido %}
+    </div>
 </body>
 </html>

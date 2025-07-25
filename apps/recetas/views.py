@@ -36,8 +36,7 @@ def comentar_receta(request):
 
 def logout_view(request):
     auth.logout(request)
-    return redirect('nombre_de_la_url_de_redireccion')  # Cambia esto por la URL a la que quieras redirigir después de cerrar sesión.
-
+    return redirect('/') 
 
 
 
