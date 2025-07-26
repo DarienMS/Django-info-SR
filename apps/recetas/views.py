@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from .models import Receta, Categoria, Comentario
 from django.urls import reverse_lazy
 from django.contrib import auth
-
+from django.views.generic import CreateView, ListView, DetailView # Agregado ListView, DetailView para referencia
+from django.contrib.auth.mixins import LoginRequiredMixin # Importa LoginRequiredMixin
+from .forms import RecetaForm
 @login_required
 def listar_recetas(request):
     contexto = {}
@@ -34,9 +36,19 @@ def comentar_receta(request):
     Comentario.objects.create(usuario=usu, receta=receta, texto=com)
     return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': receta_id}))
 
-def logout_view(request):
-    auth.logout(request)
-    return redirect('/') 
+   
+class RecetaCreateView(LoginRequiredMixin, CreateView):
+    model = Receta
+    form_class = RecetaForm # Usamos el formulario que creamos en recetas/forms.py
+    template_name = 'recetas/agregar_receta.html' # La plantilla donde estará el formulario
+
+   
+    success_url = reverse_lazy('recetas:listar_recetas') 
+
+  
+    def form_valid(self, form):
+     
+        return super().form_valid(form) # Llama al método original para guardar el formulario
 
 
 

@@ -1,0 +1,20 @@
+
+{% extends 'base.html' %} 
+{% load static %} 
+
+{% block title %}Agregar Nueva Receta{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Agregar Nueva Receta</h1>
+    <form method="post" enctype="multipart/form-data"> 
+        {% csrf_token %} {# Token de seguridad requerido por Django #}
+
+        {# Renderiza el formulario completo con sus etiquetas y campos #}
+        {{ form.as_p }} 
+
+
+        <button type="submit" class="btn btn-primary">Guardar Receta</button>
+    </form>
+</div>
+{% endblock %}

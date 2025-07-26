@@ -10,7 +10,15 @@
             <a href="?id={{cat.pk}}">{{cat.nombre}}</a>
         {% endfor %}
     </div>
-
+<div class="mt-4 mb-4"> 
+        {% if user.is_authenticated %} 
+            <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success">
+                + Agregar Nueva Receta
+            </a>
+        {% else %}
+            <p>Inicia sesión para agregar nuevas recetas.</p>
+        {% endif %}
+    </div>
     <h1>LISTA DE RECETAS</h1>
 
     {% for receta in recetas %}
