@@ -1,0 +1,52 @@
+{# apps/recetas/templates/recetas/mis_recetas.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Recetas{% endblock title %} {# Asegúrate que el bloque de título sea 'title' o 'titulo' según tu base.html #}
+
+{% block contenido %} {# Usa 'contenido' para ser consistente con tu listar.html #}
+<div class="mt-4 mb-4">
+    <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success">
+        + Agregar Nueva Receta
+    </a>
+    <a href="{% url 'recetas:listar' %}" class="btn btn-info">
+        Ver Todas las Recetas
+    </a>
+</div>
+
+<h1>MIS RECETAS</h1>
+
+{% if mis_recetas %} {# Esta es la variable de contexto de MisRecetasListView #}
+    {% for receta in mis_recetas %}
+        <img src="{{receta.imagen.url}}" width="100" height="100">
+        <p><a href="{% url 'recetas:detalle' receta.pk %}">TITULO: {{receta.titulo}}</a></p>
+        <p>FECHA: {{receta.fecha}}</p>
+        <p>CATEGORIA: {{receta.categoria_receta}}</p>
+        <p>CUERPO: {{receta.cuerpo}}</p>
+        <p><small class="text-muted">Autor: {{ receta.autor.username }}</small></p>
+        {# Aquí podrías añadir botones de Editar y Eliminar para las propias recetas del usuario #}
+        {# <a href="{% url 'recetas:editar_receta' receta.pk %}" class="btn btn-sm btn-warning">Editar</a> #}
+        {# <a href="{% url 'recetas:eliminar_receta' receta.pk %}" class="btn btn-sm btn-danger">Eliminar</a> #}
+        <br><br>
+    {% endfor %}
+
+    {# Opcional: Paginación si la necesitas #}
+    {% if is_paginated %}
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+                {% endif %}
+                <li class="page-item active"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+                {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+{% else %}
+    <p>Aún no has creado ninguna receta.</p>
+    <p>¡Anímate a <a href="{% url 'recetas:agregar_receta' %}">agregar tu primera receta</a>!</p>
+{% endif %}
+{% endblock contenido %}

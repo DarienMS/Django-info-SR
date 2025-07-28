@@ -1,56 +1,61 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Receta, Categoria, Comentario
+# apps/recetas/views.py
+from django.shortcuts import render
+from django.views.generic import CreateView, ListView, DetailView
 from django.urls import reverse_lazy
-from django.contrib import auth
-from django.views.generic import CreateView, ListView, DetailView # Agregado ListView, DetailView para referencia
-from django.contrib.auth.mixins import LoginRequiredMixin # Importa LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import RecetaForm
-@login_required
-def listar_recetas(request):
-    contexto = {}
-    id_categoria = request.GET.get('id', None)
-    if id_categoria:
-        recetas = Receta.objects.filter(categoria_receta=id_categoria)
-    else:
-        recetas = Receta.objects.all()
-    contexto['recetas'] = recetas
-    contexto['categorias'] = Categoria.objects.all().order_by('nombre')
-    return render(request, 'recetas/listar.html', contexto)
+from .models import Receta, Categoria
+from django.db.models import Q
 
-@login_required
-def detalle_receta(request, pk):
-    contexto = {}
-    receta = Receta.objects.get(pk=pk)
-    contexto['receta'] = receta
-    comentarios = Comentario.objects.filter(receta=receta)
-    contexto['comentarios'] = comentarios
-    return render(request, 'recetas/detalle.html', contexto)
-
-@login_required
-def comentar_receta(request):
-    com = request.POST.get('comentario', None)
-    usu = request.user
-    receta_id = request.POST.get('id_receta', None)
-    receta = Receta.objects.get(pk=receta_id)
-    Comentario.objects.create(usuario=usu, receta=receta, texto=com)
-    return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': receta_id}))
-
-   
+# Vista para crear una nueva receta
 class RecetaCreateView(LoginRequiredMixin, CreateView):
     model = Receta
-    form_class = RecetaForm # Usamos el formulario que creamos en recetas/forms.py
-    template_name = 'recetas/agregar_receta.html' # La plantilla donde estará el formulario
+    form_class = RecetaForm
+    template_name = 'recetas/agregar_receta.html'
+    success_url = reverse_lazy('recetas:listar') # Redirigimos al listado general
 
-   
-    success_url = reverse_lazy('recetas:listar_recetas') 
-
-  
     def form_valid(self, form):
-     
-        return super().form_valid(form) # Llama al método original para guardar el formulario
+        form.instance.autor = self.request.user
+        return super().form_valid(form)
 
+class RecetaListView(ListView):
+    model = Receta
+    template_name = 'recetas/listar.html' # Usamos tu plantilla 'listar.html'
+    context_object_name = 'recetas'
+    ordering = ['-fecha']
+    paginate_by = 10 # Opcional
 
+    def get_context_data(self, **kwargs):
+        # Llama a la implementación base para obtener un contexto
+        context = super().get_context_data(**kwargs)
+        # Agrega las categorías al contexto
+        context['categorias'] = Categoria.objects.all().order_by('nombre')
 
+        # Si hay un filtro por categoría en la URL (ej. ?id=1)
+        categoria_id = self.request.GET.get('id')
+        if categoria_id:
+            try:
+                categoria = Categoria.objects.get(pk=categoria_id)
+                context['recetas'] = Receta.objects.filter(categoria_receta=categoria).order_by('-fecha')
+                context['categoria_actual'] = categoria # Para mostrar qué categoría está filtrada
+            except Categoria.DoesNotExist:
+                pass # Manejar si la categoría no existe
 
-LOGOUT_REDIRECT_URL = '/'
+        return context
+
+# Vista para listar SOLO las recetas del usuario logueado
+class MisRecetasListView(LoginRequiredMixin, ListView):
+    model = Receta
+    template_name = 'recetas/mis_recetas.html' # Nueva plantilla para mis recetas
+    context_object_name = 'mis_recetas'
+    ordering = ['-fecha']
+    paginate_by = 10
+
+    def get_queryset(self):
+        return Receta.objects.filter(autor=self.request.user).order_by('-fecha')
+
+# Vista de detalle de una receta
+class RecetaDetailView(DetailView):
+    model = Receta
+    template_name = 'recetas/detalle_receta.html' # Asume que tienes esta plantilla
+    context_object_name = 'receta'
