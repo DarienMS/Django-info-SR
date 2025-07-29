@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import Usuario 
 
-class RegistroForm(UserCreationForm):
+class   RegistroForm(UserCreationForm):
     class Meta(UserCreationForm.Meta): # heredar la Meta de UserCreationForm(esto ya es propio de django)
         model = Usuario
         fields = [
