@@ -1,34 +1,164 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block titulo %}RECETAS{% endblock titulo %}
+{% block titulo %}{{ receta.titulo }}{% endblock titulo %}
 
 {% block contenido %}
-	<h1>DETALLE DE LA RECETA</h1>
-		<img src="{{receta.imagen.url}}" width="500" height="500">
-		
-		<p>TITULO: {{receta.titulo}}</p>
-		
-		<p>FECHA: {{receta.fecha}}</p>
-		<p>CATEGORIA: {{receta.categoria_receta}}</p>
-		<p>CUERPO: {{receta.cuerpo}}</p>
-		<br><br>
-		<br>
-		<form method="POST" action="{% url 'recetas:comentar' %}">{% csrf_token %}
-			<textarea name="comentario" maxlength="1500"></textarea>
-			<input type="text" name="id_receta" value="{{receta.pk}}" hidden=""> 
-			<input type="submit" value="GUARDAR">
-		</form>
-		<br><br><br>
-		<h3>COMENTARIOS</h3>
-		{% for com in comentarios %}
-			{% if user == com.usuario %}
-				<a href="">borrar</a>
-			{% endif %}
-			<strong>FECHA:{{com.fecha}}</strong><br>
-			<strong>USUARIO:{{com.usuario}}</strong><br>
-			<p>{{com.texto}}</p>
-		{% endfor %}
-		<a href="{% url 'recetas:listar' %}">VOLVER</a>
-{% endblock contenido %}
+    <div class="receta-detalle">
+        <h1>{{ receta.titulo }}</h1>
+        {% if receta.imagen %}
+            <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}" class="img-detalle">
+        {% else %}
+            <img src="{% static 'img/placeholder.png' %}" alt="Sin imagen" class="img-detalle">
+        {% endif %}
 
+        <p><strong>Autor:</strong> {{ receta.autor.username }}</p>
+        <p><strong>Fecha:</strong> {{ receta.fecha|date:"d M, Y" }}</p>
+        <p><strong>Categoría:</strong> {% if receta.categoria_receta %}{{ receta.categoria_receta.nombre }}{% else %}Sin categoría{% endif %}</p>
+      
+        <hr>
+        <h2>Preparación:</h2>
+        <div class="receta-cuerpo">
+            {{ receta.cuerpo|linebreaksbr }}
+        </div>
+
+        <br>
+        <a href="{% url 'recetas:listar' %}" class="btn btn-primary">Volver a la lista de Recetas</a>
+        
+        {% if user.is_authenticated and user == receta.autor %}
+           
+        {% endif %}
+
+        <br>
+        <h3>Deja un comentario:</h3>
+        {% if user.is_authenticated %}
+            <form method="POST" action="{% url 'recetas:comentar' %}">
+                {% csrf_token %}
+                <input type="hidden" name="receta_id" value="{{ receta.pk }}">
+                <textarea name="comentario" maxlength="1500" placeholder="Escribe tu comentario aquí..." style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                <button type="submit" class="btn btn-success" style="margin-top: 10px;">Comentar</button>
+            </form>
+        {% else %}
+            <p>Por favor, <a href="{% url 'login' %}">inicia sesión</a> para dejar un comentario.</p>
+        {% endif %}
+
+        <hr>
+        <h3>Comentarios ({{ receta.comentarios.count }}):</h3>
+        <div class="comentarios-seccion">
+            {% if receta.comentarios.all %}
+                {% for comentario in receta.comentarios.all %}
+                    <div class="comentario-item" style="border: 1px solid #eee; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                        <p><strong>{{ comentario.usuario.username }}</strong> - <small>{{ comentario.fecha|date:"d M, Y H:i" }}</small></p>
+                        <p>{{ comentario.texto|linebreaksbr }}</p>
+                    </div>
+                {% empty %}
+                    <p>No hay comentarios para esta receta aún. ¡Sé el primero en comentar!</p>
+                {% endfor %}
+            {% else %}
+                <p>No hay comentarios para esta receta aún. ¡Sé el primero en comentar!</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    {% comment %} {# despues le agrego una hoja de stylos,lo mismo para el JS #}
+    <style>
+        /* Estos estilos son solo para demostrar, lo ideal es ponerlos en main.css */
+        .receta-detalle {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .receta-detalle h1, .receta-detalle h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .receta-detalle .img-detalle {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .receta-detalle p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .receta-detalle h2 {
+            margin-top: 25px;
+            color: #444;
+        }
+        .receta-detalle .receta-cuerpo {
+            line-height: 1.6;
+            color: #333;
+        }
+        .btn-primary, .btn-success, .btn-warning, .btn-danger {
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .comentarios-seccion {
+            margin-top: 20px;
+        }
+        .comentario-item {
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .comentario-item p {
+            margin-bottom: 5px;
+        }
+        .comentario-item small {
+            color: #888;
+        }
+        /* Estilos para mensajes de Django */
+        ul.messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        ul.messages li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            color: #333;
+            background-color: #d4edda; /* Default success */
+            border: 1px solid #c3e6cb;
+        }
+        ul.messages li.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        ul.messages li.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        ul.messages li.warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+        ul.messages li.info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+    </style> {% endcomment %}
+{% endblock contenido %}

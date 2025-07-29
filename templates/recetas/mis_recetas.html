@@ -1,52 +1,141 @@
 {# apps/recetas/templates/recetas/mis_recetas.html #}
 {% extends 'base.html' %}
-{% load static %}
+{% load static %} 
 
-{% block title %}Mis Recetas{% endblock title %} {# Asegúrate que el bloque de título sea 'title' o 'titulo' según tu base.html #}
+{% block title %}Mis Recetas{% endblock title %}
 
-{% block contenido %} {# Usa 'contenido' para ser consistente con tu listar.html #}
-<div class="mt-4 mb-4">
-    <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success">
-        + Agregar Nueva Receta
-    </a>
-    <a href="{% url 'recetas:listar' %}" class="btn btn-info">
-        Ver Todas las Recetas
-    </a>
-</div>
+{% block contenido %}
+<main role="main">
+    <div class="container mt-4">
+        <h1 class="mb-4">Mis Recetas</h1>
 
-<h1>MIS RECETAS</h1>
+        {% if messages %}
+            <div class="messages mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-{% if mis_recetas %} {# Esta es la variable de contexto de MisRecetasListView #}
-    {% for receta in mis_recetas %}
-        <img src="{{receta.imagen.url}}" width="100" height="100">
-        <p><a href="{% url 'recetas:detalle' receta.pk %}">TITULO: {{receta.titulo}}</a></p>
-        <p>FECHA: {{receta.fecha}}</p>
-        <p>CATEGORIA: {{receta.categoria_receta}}</p>
-        <p>CUERPO: {{receta.cuerpo}}</p>
-        <p><small class="text-muted">Autor: {{ receta.autor.username }}</small></p>
-        {# Aquí podrías añadir botones de Editar y Eliminar para las propias recetas del usuario #}
-        {# <a href="{% url 'recetas:editar_receta' receta.pk %}" class="btn btn-sm btn-warning">Editar</a> #}
-        {# <a href="{% url 'recetas:eliminar_receta' receta.pk %}" class="btn btn-sm btn-danger">Eliminar</a> #}
-        <br><br>
-    {% endfor %}
+        {% if mis_recetas %}
+        <div class="row row-cols-1 row-cols-md-3 g-4 mt-3">
+            {% for receta in mis_recetas %}
+            <div class="col">
+                <div class="card h-100 shadow-sm
+                    {% if receta.fecha_baja %}border-danger bg-light{% endif %}"> 
+                    {% if receta.imagen %}
+                        <img src="{{ receta.imagen.url }}" class="card-img-top" alt="{{ receta.titulo }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <img src="{% static 'img/placeholder.png' %}" class="card-img-top" alt="Imagen no disponible" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title {% if receta.fecha_baja %}text-danger{% endif %}">{{ receta.titulo }}</h5>
+                        <p class="card-text text-muted small">Publicada: {{ receta.fecha|date:"d M Y" }}</p>
+                        {% if receta.fecha_modificacion and receta.fecha_modificacion|date:"Y-m-d H:i" != receta.fecha|date:"Y-m-d H:i" %}
+                            <p class="card-text text-muted small">Última Modificación: {{ receta.fecha_modificacion|date:"d M Y P" }}</p>
+                        {% endif %}
+                        {% if receta.fecha_baja %}
+                            <p class="card-text text-danger small">** DADA DE BAJA ** el {{ receta.fecha_baja|date:"d M Y P" }} por {{ receta.usuario_baja.username }}</p>
+                        {% endif %}
+                        <p class="card-text">{{ receta.cuerpo|truncatechars:100 }}</p>
+                        <div class="mt-auto d-flex justify-content-between">
+                            <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-info btn-sm">Ver</a>
+                            
+                            {% if not receta.fecha_baja %} {# Solo mostrar Modificar y Eliminar si NO está de baja #}
+                                 <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning btn-sm">Modificar</a>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteModal"
+                                    data-receta-id="{{ receta.pk }}"
+                                    data-receta-titulo="{{ receta.titulo }}">
+                                    Eliminar
+                                </button>
+                            {% else %} {# Mostrar Habilitar si SÍ está de baja #}
+                              
+                                <form action="{% url 'recetas:receta_habilitar' receta.pk %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-sm">Habilitar</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
 
-    {# Opcional: Paginación si la necesitas #}
-    {% if is_paginated %}
-        <nav aria-label="Page navigation example">
+       
+        {% if is_paginated %}
+        <nav aria-label="Page navigation example" class="mt-4">
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
                 {% endif %}
-                <li class="page-item active"><a class="page-link" href="#">{{ page_obj.number }}</a></li>
+                {% for i in page_obj.paginator.page_range %}
+                    {% if page_obj.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
                 {% if page_obj.has_next %}
                     <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
                 {% endif %}
             </ul>
         </nav>
-    {% endif %}
+        {% endif %}
 
-{% else %}
-    <p>Aún no has creado ninguna receta.</p>
-    <p>¡Anímate a <a href="{% url 'recetas:agregar_receta' %}">agregar tu primera receta</a>!</p>
-{% endif %}
+
+        {% else %}
+        <div class="alert alert-info mt-4" role="alert">
+            Aún no tienes recetas publicadas. <a href="{% url 'recetas:agregar' %}" class="alert-link">¡Crea tu primera receta!</a>
+        </div>
+        {% endif %}
+    </div>
+</main>
+
+{# --- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN (Mantiene el mismo id) --- #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Baja de Receta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres dar de baja la receta "<strong id="recetaTituloModal"></strong>"?
+                <p class="mt-2 text-muted small">Esta acción marcará la receta como inactiva. No se eliminará permanentemente de la base de datos.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sí, dar de baja</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+    confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var recetaId = button.getAttribute('data-receta-id');
+        var recetaTitulo = button.getAttribute('data-receta-titulo');
+
+        var modalTitle = confirmDeleteModal.querySelector('#recetaTituloModal');
+        modalTitle.textContent = recetaTitulo;
+
+        var deleteForm = confirmDeleteModal.querySelector('#deleteForm');
+        
+        deleteForm.action = `/Recetas/receta/eliminar/${recetaId}/`; 
+    });
+</script>
+{% endblock extra_js %}
+
 {% endblock contenido %}

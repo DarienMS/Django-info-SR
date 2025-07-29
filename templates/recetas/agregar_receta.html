@@ -1,19 +1,53 @@
+{# apps/recetas/templates/recetas/agregar_receta.html #}
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Registro{% endblock %}
+{% block title %}
+    {% if object %}
+        Modificar Receta - {{ object.titulo }}
+    {% else %}
+        Agregar Receta
+    {% endif %}
+{% endblock %}
+
 {% block contenido %}
 
 <main role="main">
-  <div class="container">
-    <div class="row mt-3">
-      <div class="col-md-9 mx-auto mb-5">
-        <form action="" method="post">{% csrf_token %}         
-         <h3 class="mb-4">Agregar Receta</h3>
-          {{form.as_p}}
-          <p><input type="submit" class="btn btn-primary btn-block" value="Agregar"></p>
-        </form>
-      </div>
+    <div class="container">
+        <div class="row mt-3">
+            <div class="col-md-9 mx-auto mb-5">
+                
+                <form method="post" enctype="multipart/form-data">{% csrf_token %}
+                    
+                    <h3 class="mb-4">
+                        {% if object %} 
+                        {% else %}
+                            Agregar Receta
+                        {% endif %}
+                    </h3>
+
+                   
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            Por favor, corrige los siguientes errores:
+                            <ul>
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field|title }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    {{ form.as_p }} 
+                    
+                    <p>
+                        <input type="submit" class="btn btn-primary btn-block" 
+                            value="{% if object %}Modificar{% else %}Agregar{% endif %}">
+                    </p>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
 </main>
 {% endblock contenido %}

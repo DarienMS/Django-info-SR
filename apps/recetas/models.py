@@ -1,13 +1,13 @@
 # apps/recetas/models.py
 from django.db import models
-from django.conf import settings # Necesario si tu modelo de usuario es personalizado y lo vinculas más adelante
-from django.utils import timezone # Añadido por mi para fecha, pero no estaba en tu original con auto_now_add
+from django.conf import settings 
+from django.utils import timezone 
 
-# Modelo para Categorías de Recetas (con jerarquía)
+
 class Categoria(models.Model):
-    nombre = models.CharField(max_length=60, unique=True) # unique=True para evitar categorías con el mismo nombre
+    nombre = models.CharField(max_length=60, unique=True) 
 
-    # parent será una clave foránea a otra Categoria.
+
     parent = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
@@ -48,25 +48,56 @@ class Receta(models.Model):
         related_name='recetas'
     )
 
-    fecha = models.DateTimeField(auto_now_add=True) # <-- Usas auto_now_add=True
-
-    # autor comentado, lo agregaremos ahora.
-    # autor = models.ForeignKey(
-    #     settings.AUTH_USER_MODEL,
-    #     on_delete=models.CASCADE,
-    #     related_name='mis_recetas',
-    #     verbose_name='Autor'
-    # )
+    fecha = models.DateTimeField(auto_now_add=True) 
+    fecha_modificacion = models.DateTimeField(auto_now=True, verbose_name='Última Modificación') # <<-- Se actualiza en cada save
+    autor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='mis_recetas',
+        verbose_name='Autor'
+    )
+    
+    fecha_baja = models.DateTimeField(null=True, blank=True, verbose_name='Fecha de Baja')
+    usuario_baja = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='recetas_dadas_de_baja',
+        verbose_name='Usuario de Baja'
+    )
 
     def __str__(self):
         return self.titulo
 
-# Modelo Comentario, tal cual lo tenías funcionando antes
+
 class Comentario(models.Model):
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Usuario')
     texto = models.TextField(max_length=1500)
-    receta = models.ForeignKey(Receta, on_delete=models.CASCADE)
-    fecha = models.DateTimeField(auto_now_add=True) # <-- Usas auto_now_add=True
+    receta = models.ForeignKey('Receta', on_delete=models.CASCADE, related_name='comentarios')
+
+    fecha = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de Publicación')
+
+
+    fecha_modificacion = models.DateTimeField(auto_now=True, verbose_name='Última Modificación') 
+    fecha_baja = models.DateTimeField(null=True, blank=True, verbose_name='Fecha de Baja')
+    usuario_baja = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL, 
+        null=True,
+        blank=True,
+        related_name='comentarios_dados_de_baja',
+        verbose_name='Usuario de Baja'
+    )
+    # -------------------------------------------------
 
     def __str__(self):
-        return f"{self.receta.titulo} -> {self.texto[:50]}..."
+        return f"Comentario de {self.usuario.username} en '{self.receta.titulo}'"
+
+    class Meta:
+        ordering = ['fecha'] 
+        verbose_name_plural = "Comentarios" 
+
+   
+    def is_active(self):
+        return self.fecha_baja is None
