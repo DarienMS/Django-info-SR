@@ -1,0 +1,153 @@
+{# apps/usuarios/templates/usuarios/lista_usuarios.html #}
+{% extends 'base.html' %}
+
+{% block title %}Lista de Usuarios{% endblock title %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4">Lista de Usuarios</h2>
+<div class="mb-3 text-end"> {# Para alinearlo a la derecha #}
+        <a href="{% url 'usuarios:crear_usuario' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Agregar Nuevo Usuario
+        </a>
+    </div>
+    {% if usuarios %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Nombre Completo</th>
+                    <th>Superusuario</th>
+                    <th>Estado</th>
+                    <th>Fecha de Registro</th>
+                    <th>Último Login</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in usuarios %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.get_full_name|default:"N/A" }}</td>
+                    <td>
+                        {% if user.is_superuser %}
+                            Sí
+                        {% else %}
+                            No
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_active %}
+                            Activo
+                        {% else %}
+                            Desactivo
+                        {% endif %}
+                    </td>
+                    <td>{{ user.date_joined|date:"d M Y H:i" }}</td>
+                    <td>{{ user.last_login|default:"Nunca"|date:"d M Y H:i" }}</td>
+                    <td>
+                        {# Botón Editar #}
+                     <a href="{% url 'usuarios:editar_usuario' user.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Usuario">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        {# Botones Deshabilitar/Habilitar que abrirán el modal #}
+                        {% if user.is_active %}
+                            <button type="button" 
+                                class="btn btn-danger btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#confirmActionModal" 
+                                data-user-id="{{ user.pk }}" 
+                                data-username="{{ user.username }}" 
+                                data-action-type="desactivar" 
+                                title="Deshabilitar Usuario">
+                                <i class="fas fa-ban"></i> Deshabilitar
+                            </button>
+                        {% else %}
+                            <button type="button" 
+                                class="btn btn-success btn-sm" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#confirmActionModal" 
+                                data-user-id="{{ user.pk }}" 
+                                data-username="{{ user.username }}" 
+                                data-action-type="activar" 
+                                title="Habilitar Usuario">
+                                <i class="fas fa-check-circle"></i> Habilitar
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="alert alert-info">No hay usuarios registrados.</p>
+    {% endif %}
+</div>
+
+{# --- INICIO: Modal de Confirmación para Deshabilitar/Habilitar --- #}
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="confirmActionModalLabel">Confirmar Acción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">¿Estás seguro de que quieres realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="actionForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" id="confirmButton">Confirmar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{# --- FIN: Modal de Confirmación --- #}
+
+{% endblock contenido %}
+
+{% block extra_js %}
+<script>
+    // Obtener el modal cuando se muestra
+    var confirmActionModal = document.getElementById('confirmActionModal');
+    confirmActionModal.addEventListener('show.bs.modal', function (event) {
+        // Botón que disparó el modal
+        var button = event.relatedTarget; 
+
+        // Extraer información de los atributos data-*
+        var userId = button.getAttribute('data-user-id');
+        var username = button.getAttribute('data-username');
+        var actionType = button.getAttribute('data-action-type'); // 'desactivar' o 'activar'
+
+        // Obtener elementos del modal
+        var modalTitle = confirmActionModal.querySelector('.modal-title');
+        var modalMessage = confirmActionModal.querySelector('#modalMessage');
+        var confirmButton = confirmActionModal.querySelector('#confirmButton');
+        var actionForm = confirmActionModal.querySelector('#actionForm');
+
+        // Configurar el modal según la acción
+        if (actionType === 'desactivar') {
+            modalTitle.textContent = 'Deshabilitar Usuario';
+            modalMessage.textContent = `¿Estás seguro de que quieres deshabilitar al usuario "${username}" (ID: ${userId})? Su estado cambiará a "Desactivo".`;
+            confirmButton.textContent = 'Deshabilitar';
+            confirmButton.className = 'btn btn-danger'; // Botón rojo para deshabilitar
+            actionForm.action = `/Usuario/desactivar/${userId}/`; // Construye la URL para desactivar
+        } else if (actionType === 'activar') {
+            modalTitle.textContent = 'Habilitar Usuario';
+            modalMessage.textContent = `¿Estás seguro de que quieres habilitar al usuario "${username}" (ID: ${userId})? Su estado cambiará a "Activo".`;
+            confirmButton.textContent = 'Habilitar';
+            confirmButton.className = 'btn btn-success'; // Botón verde para habilitar
+            actionForm.action = `/Usuario/activar/${userId}/`; // Construye la URL para activar
+        }
+    });
+</script>
+{% endblock extra_js %}
