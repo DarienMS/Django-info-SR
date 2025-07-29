@@ -4,16 +4,14 @@
 {% block titulo %}RECETAS{% endblock titulo %}
 
 {% block contenido %}
-    <div class="container mt-4"> 
-
-      
-        <form method="GET" action="{% url 'recetas:listar' %}" class="mb-4 d-flex flex-wrap align-items-center justify-content-between">
-            
-           
-            <div class="mb-2 me-3">
-                <label for="id_categoria" class="form-label me-2">Filtrar por Categoría:</label>
+<div class="container mt-4">
+    <div class="card shadow p-4" style="background-color: #E9D3B3;">
+        <h2 class="mb-4 text-center">Listado de Recetas</h2>
+        <form method="GET" action="{% url 'recetas:listar' %}" class="mb-4 row g-3 align-items-end justify-content-between">
+            <div class="col-md-4">
+                <label for="id_categoria" class="form-label">Filtrar por Categoría:</label>
                 <select name="id" id="id_categoria" class="form-select" onchange="this.form.submit()">
-                    <option value="">TODAS</option> 
+                    <option value="">TODAS</option>
                     {% for cat in categorias %}
                         <option value="{{ cat.pk }}" {% if categoria_actual and categoria_actual.pk == cat.pk %}selected{% endif %}>
                             {{ cat.nombre }}
@@ -21,37 +19,33 @@
                     {% endfor %}
                 </select>
             </div>
-
-            {# Filtro por Dulce/Salado #}
-            <div class="mb-2 me-3">
-                <label for="id_tipo" class="form-label me-2">Filtrar por Tipo:</label>
+            <div class="col-md-3">
+                <label for="id_tipo" class="form-label">Filtrar por Tipo:</label>
                 <select name="tipo" id="id_tipo" class="form-select" onchange="this.form.submit()">
-                    <option value="">Todos los tipos</option> {# Opción para todos los tipos #}
+                    <option value="">Todos los tipos</option>
                     <option value="dulce" {% if tipo_actual == 'dulce' %}selected{% endif %}>Dulces</option>
                     <option value="salado" {% if tipo_actual == 'salado' %}selected{% endif %}>Saladas</option>
                     <option value="ambos" {% if tipo_actual == 'ambos' %}selected{% endif %}>Ambos</option>
                 </select>
             </div>
-
-            {# Buscador #}
-            <div class="search-bar mb-2 flex-grow-1 me-3"> {# flex-grow-1 para que ocupe espacio #}
-                <input type="text" name="q" placeholder="Buscar por título o cuerpo..." value="{{ busqueda_actual }}" class="form-control">
-            </div>
-
-            <div class="mb-2 d-flex">
-                <button type="submit" class="btn btn-primary me-2">Buscar</button>
-                {% if categoria_actual or tipo_actual or busqueda_actual %}
-                    <a href="{% url 'recetas:listar' %}" class="btn btn-secondary">Limpiar Filtros</a>
-                {% endif %}
+            <div class="col-md-5">
+                <label for="id_busqueda" class="form-label">Buscar:</label>
+                <div class="input-group">
+                    <input type="text" name="q" id="id_busqueda" placeholder="Buscar por título o cuerpo..." value="{{ busqueda_actual }}" class="form-control">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                    {% if categoria_actual or tipo_actual or busqueda_actual %}
+                        <a href="{% url 'recetas:listar' %}" class="btn btn-secondary">Limpiar</a>
+                    {% endif %}
+                </div>
             </div>
         </form>
 
-        <div class="mt-4 mb-4">
+        <div class="mb-4 text-center">
             {% if user.is_authenticated %}
-                <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success">
+                <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success me-2">
                     + Agregar Nueva Receta
                 </a>
-                <a href="{% url 'recetas:mis_recetas' %}" class="btn btn-info"> {# Cambiado a btn-info para diferenciar #}
+                <a href="{% url 'recetas:mis_recetas' %}" class="btn btn-info">
                     Mis Recetas
                 </a>
             {% else %}
@@ -59,26 +53,30 @@
             {% endif %}
         </div>
 
-        <h1>LISTA DE RECETAS</h1>
-
-        <div class="recetas-grid"> 
+        <div class="row">
             {% for receta in recetas %}
-               
-                <a href="{% url 'recetas:detalle' receta.pk %}" class="receta-card">
-                    {% if receta.imagen %}
-                        <img src="{{ receta.imagen.url }}" alt="Imagen de {{ receta.titulo }}">
-                    {% else %}
-                        <img src="{% static 'img/placeholder.png' %}" alt="Sin imagen">
-                    {% endif %}
-                    <div class="receta-info">
-                        <h3>{{ receta.titulo }}</h3>
-                        <p>Categoría: {{ receta.categoria_receta }}</p>
-                        
-                    </div>
-                </a>
+                <div class="col-md-4 mb-4">
+                    <a href="{% url 'recetas:detalle' receta.pk %}" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm">
+                            {% if receta.imagen %}
+                                <img src="{{ receta.imagen.url }}" class="card-img-top" alt="Imagen de {{ receta.titulo }}">
+                            {% else %}
+                                <img src="{% static 'img/placeholder.png' %}" class="card-img-top" alt="Sin imagen">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ receta.titulo }}</h5>
+                                <p class="card-text mb-1"><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
+                                <p class="card-text"><small class="text-muted">{{ receta.fecha|date:"d/m/Y" }}</small></p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
             {% empty %}
-                <p>No se encontraron recetas que coincidan con los criterios de búsqueda.</p>
+                <div class="col-12">
+                    <p class="text-center">No se encontraron recetas que coincidan con los criterios de búsqueda.</p>
+                </div>
             {% endfor %}
         </div>
-    </div> {# Cierre del container #}
+    </div>
+</div>
 {% endblock contenido %}

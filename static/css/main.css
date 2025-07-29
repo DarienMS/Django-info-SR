@@ -1,6 +1,9 @@
 body {
     background-color: #fff8e1; /* crema claro */
 }
+body nav {
+	background-color: #E9D3B3; /* gris claro */
+}
 
 .centrar{
 	text-align: center;
@@ -14,3 +17,111 @@ body {
 .submenu{
 	font-size: 18px	;
 }
+
+/* Cambia el color de fondo del offcanvas */
+.offcanvas {
+    background-color: #fff8e1 !important; /* Cambia este color al que prefieras */
+}
+
+/* Opcional: cambia el color del texto dentro del offcanvas */
+.offcanvas .offcanvas-body, 
+.offcanvas .offcanvas-title {
+    color: #5d4037; /* Cambia este color al que prefieras */
+}
+
+.receta-detalle {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .receta-detalle h1, .receta-detalle h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .receta-detalle .img-detalle {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .receta-detalle p {
+            margin-bottom: 5px;
+            color: #555;
+        }
+        .receta-detalle h2 {
+            margin-top: 25px;
+            color: #444;
+        }
+        .receta-detalle .receta-cuerpo {
+            line-height: 1.6;
+            color: #333;
+        }
+        .btn-primary, .btn-success, .btn-warning, .btn-danger {
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .comentarios-seccion {
+            margin-top: 20px;
+        }
+        .comentario-item {
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .comentario-item p {
+            margin-bottom: 5px;
+        }
+        .comentario-item small {
+            color: #888;
+        }
+        /* Estilos para mensajes de Django */
+        ul.messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        ul.messages li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            color: #333;
+            background-color: #d4edda; /* Default success */
+            border: 1px solid #c3e6cb;
+        }
+        ul.messages li.success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        ul.messages li.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        ul.messages li.warning {
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+            color: #856404;
+        }
+        ul.messages li.info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }

@@ -3,8 +3,39 @@
 
 {% block titulo %}HOME{% endblock titulo %}
 
-
 {% block contenido %}
-	<h2>HOME</h2>
+  <!-- Banner de bienvenida -->
+  <div class="p-5 mb-4 text-center" style="background-color: #E9D3B3;">
+    <div class="container py-5">
+      <h1 class="display-4">¡Bienvenido a Recetas SR!</h1>
+      <p class="lead">Descubre, comparte y disfruta las mejores recetas caseras.</p>
+      <img src="{% static 'img/banner-cocina.png' %}" alt="Banner cocina" class="img-fluid rounded" style="max-height: 300px; width: 500px;">
+    </div>
+  </div>
+
+  <!-- Recetas recientes -->
+  <div class="container">
+    <h2 class="mb-4">Recetas recientes</h2>
+    <div class="row">
+      {% for receta in recetas_recientes %}
+        <div class="col-md-4 mb-4">
+          <div class="card h-100">
+            {% if receta.imagen %}
+              <img src="{{ receta.imagen.url }}" class="card-img-top" alt="{{ receta.titulo }}">
+            {% else %}
+              <img src="{% static 'img/placeholder.png' %}" class="card-img-top" alt="Sin imagen">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ receta.titulo }}</h5>
+              <p class="card-text">{{ receta.cuerpo|truncatechars:100 }}</p>
+              <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-primary">Ver receta</a>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p>No hay recetas recientes.</p>
+      {% endfor %}
+    </div>
+  </div>
 {% endblock contenido %}
 

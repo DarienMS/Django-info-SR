@@ -1,11 +1,29 @@
 {% extends 'base.html' %}
 
 {% block contenido %}
-			<form method="POST">{%csrf_token%}
-				{{form.errors}}
-				<input type="text" name="username" placeholder="USUARIO">
-				<input type="password" name="password" placeholder="PASSWORD">
-
-				<input type="submit" name="" value="ENVIAR">
-			</form>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <div class="card shadow p-4" style="max-width: 400px; width: 100%; background-color: #fce4c2;">
+    <h2 class="mb-4 text-center">Iniciar sesión</h2>
+    <form method="POST">
+      {% csrf_token %}
+      {% if form.errors %}
+        <div class="alert alert-danger">
+          {{ form.errors }}
+        </div>
+      {% endif %}
+      <div class="mb-3">
+        <label for="id_username" class="form-label">Usuario</label>
+        <input type="text" name="username" class="form-control" id="id_username" placeholder="Usuario" required>
+      </div>
+      <div class="mb-3">
+        <label for="id_password" class="form-label">Contraseña</label>
+        <input type="password" name="password" class="form-control" id="id_password" placeholder="Contraseña" required>
+        <div id="passwordHelpBlock" class="form-text">
+          Tu contraseña debe tener entre 8 y 20 caracteres, contener letras y números, y no debe contener espacios, caracteres especiales ni emojis.
+        </div>
+      </div>
+      <button type="submit" class="btn w-100" style="background-color: #000; color: #fff;">Ingresar</button>
+    </form>
+  </div>
+</div>
 {% endblock %}

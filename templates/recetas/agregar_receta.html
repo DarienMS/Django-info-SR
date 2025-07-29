@@ -10,43 +10,46 @@
 {% endblock %}
 
 {% block contenido %}
-
 <main role="main">
-    <div class="container">
-        <div class="row mt-3">
-            <div class="col-md-9 mx-auto mb-5">
-                
-                <form method="post" enctype="multipart/form-data">{% csrf_token %}
-                    
-                    <h3 class="mb-4">
-                        {% if object %} 
-                        {% else %}
-                            Agregar Receta
-                        {% endif %}
-                    </h3>
-
-                   
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            Por favor, corrige los siguientes errores:
-                            <ul>
-                                {% for field, errors in form.errors.items %}
-                                    {% for error in errors %}
-                                        <li>{{ field|title }}: {{ error }}</li>
-                                    {% endfor %}
-                                {% endfor %}
-                            </ul>
-                        </div>
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+        <div class="card shadow p-4" style="max-width: 600px; width: 100%; background-color: #E9D3B3;">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h3 class="mb-4 text-center">
+                    {% if object %}
+                        Modificar Receta
+                    {% else %}
+                        Agregar Receta
                     {% endif %}
-
-                    {{ form.as_p }} 
-                    
-                    <p>
-                        <input type="submit" class="btn btn-primary btn-block" 
-                            value="{% if object %}Modificar{% else %}Agregar{% endif %}">
-                    </p>
-                </form>
-            </div>
+                </h3>
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        Por favor, corrige los siguientes errores:
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field|title }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn w-100" style="background-color: #000; color: #fff;">
+                    {% if object %}Modificar{% else %}Agregar{% endif %}
+                </button>
+            </form>
         </div>
     </div>
 </main>

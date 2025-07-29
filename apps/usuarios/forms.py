@@ -28,3 +28,6 @@ class RegistroForm(UserCreationForm):
         self.fields['email'].label = 'Correo Electrónico'
         self.fields['first_name'].label = 'Nombre'
         self.fields['last_name'].label = 'Apellido'
+
+        for field in self.fields.values():
+            field.widget.attrs['class'] = 'form-control'

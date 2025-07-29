@@ -4,30 +4,31 @@
 {% block titulo %}{{ receta.titulo }}{% endblock titulo %}
 
 {% block contenido %}
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-8">
-                <h1 class="mb-3">{{ receta.titulo }}</h1>
+<div class="container d-flex flex-column align-items-center justify-content-center mt-4">
+    <div class="row w-100 justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow p-4 mb-4" style="background-color: #E9D3B3;">
+                <h1 class="mb-3 text-center">{{ receta.titulo }}</h1>
                 {% if receta.imagen %}
-                    <img src="{{ receta.imagen.url }}" class="img-fluid rounded mb-3" alt="Imagen de {{ receta.titulo }}" style="max-height: 400px; object-fit: cover;">
+                    <img src="{{ receta.imagen.url }}" class="img-fluid rounded mb-3 d-block mx-auto" alt="Imagen de {{ receta.titulo }}" style="max-height: 400px; object-fit: cover;">
                 {% else %}
-                    <img src="{% static 'img/placeholder.png' %}" class="img-fluid rounded mb-3" alt="Sin imagen" style="max-height: 400px; object-fit: cover;">
+                    <img src="{% static 'img/placeholder.png' %}" class="img-fluid rounded mb-3 d-block mx-auto" alt="Sin imagen" style="max-height: 400px; object-fit: cover;">
                 {% endif %}
 
-                <p class="text-muted">Por: {{ receta.autor.username }}</p>
-                <p><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
-                <p><strong>Tipo:</strong> {{ receta.get_tipo_display }}</p>
+                <p class="text-muted text-center">Por: {{ receta.autor.username }}</p>
+                <p class="text-center"><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
+                <p class="text-center"><strong>Tipo:</strong> {{ receta.get_tipo_display }}</p>
 
                 <hr>
 
-                <h3>Ingredientes:</h3>
-                <p>{{ receta.ingredientes|linebreaksbr }}</p>
+                <h3 class="text-center">Ingredientes:</h3>
+                <p class="text-center">{{ receta.ingredientes|linebreaksbr }}</p>
 
-                <h3>Preparación:</h3>
-                <p>{{ receta.cuerpo|linebreaksbr }}</p>
+                <h3 class="text-center">Preparación:</h3>
+                <p class="text-center">{{ receta.cuerpo|linebreaksbr }}</p>
 
                 {% if user.is_authenticated and user == receta.autor %}
-                    <div class="mt-4">
+                    <div class="mt-4 text-center">
                         <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning me-2">Editar Receta</a>
                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteRecetaModal">
                             Eliminar Receta
@@ -35,150 +36,70 @@
                     </div>
                 {% endif %}
             </div>
-
-            <div class="col-md-4">
-           
-            </div>
-        </div>
-
-        <hr class="mt-5">
-
-        <div class="comentarios-seccion mt-5">
-            <h3>Comentarios:</h3>
-            {# Formulario para agregar nuevo comentario #}
-            {% if user.is_authenticated %}
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">Añadir un nuevo comentario:</h5>
-                        <form method="post">
-                            {% csrf_token %}
-                            {{ comentario_form.as_p }}
-                            <button type="submit" class="btn btn-primary">Publicar Comentario</button>
-                        </form>
-                    </div>
-                </div>
-            {% else %}
-                <p>Inicia sesión para poder dejar un comentario.</p>
-            {% endif %}
-
-            {# Lista de comentarios existentes #}
-            {% if comentarios %}
-             {% for comentario in comentarios %}
-    <div class="card mb-3">
-        <div class="card-body">
-            <p class="card-text">{{ comentario.texto }}</p>
-            <footer class="blockquote-footer">
-              
-                Por <cite title="Source Title">{{ comentario.usuario.username }}</cite>
-                el {{ comentario.fecha_creacion|date:"d M Y H:i" }}
-                {% if comentario.fecha_modificacion %}(Editado el {{ comentario.fecha_modificacion|date:"d M Y H:i" }}){% endif %}
-            </footer>
-            {% if user.is_authenticated %}
-               
-                {% if user == comentario.usuario or user.is_superuser %} 
-                    <div class="mt-2">
-                        <button type="button" class="btn btn-sm btn-info edit-comment-btn"
-                            data-bs-toggle="modal"
-                            data-bs-target="#editCommentModal"
-                            data-comment-id="{{ comentario.pk }}"
-                            data-comment-text="{{ comentario.texto }}"
-
-                            data-edit-url="{% url 'recetas:comentario_editar' pk=0 %}">
-                            Editar
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger"
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmDeleteCommentModal"
-                            data-comment-id="{{ comentario.pk }}"
-                            
-                            data-delete-url="{% url 'recetas:comentario_eliminar' pk=0 %}"> 
-                            Eliminar
-                        </button>
-                    </div>
-                {% endif %}
-            {% endif %}
-        </div>
-    </div>
-{% endfor %}
-              
-            {% else %}
-                <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
-            {% endif %}
         </div>
     </div>
 
+    <hr class="mt-5 w-100">
 
-    <div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editCommentModalLabel">Editar Comentario</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="editCommentForm" method="post" action=""> {# Action se llenará con JS #}
-                    {% csrf_token %}
-                    <div class="modal-body">
+    <div class="comentarios-seccion mt-5 w-100 d-flex flex-column align-items-center">
+        <h3 class="text-center">Comentarios:</h3>
+        {% if user.is_authenticated %}
+            <div class="card mb-4 shadow" style="background-color: #E9D3B3; max-width: 800px; width: 100%;">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Añadir un nuevo comentario:</h5>
+                    <form method="post">
+                        {% csrf_token %}
                         <div class="mb-3">
-                            <label for="commentTextInput" class="form-label">Tu comentario:</label>
-                            <textarea class="form-control" id="commentTextInput" name="texto" rows="5"></textarea>
+                            <label for="id_texto" class="form-label">Comentario</label>
+                            {{ comentario_form.texto }}
                         </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="confirmDeleteCommentModal" tabindex="-1" aria-labelledby="confirmDeleteCommentModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteCommentModalLabel">Confirmar Eliminación</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    ¿Estás seguro de que quieres eliminar este comentario?
-                    <p class="mt-2 text-muted" id="commentTextToDelete"></p> {# Aquí se mostrará el texto del comentario a eliminar #}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form id="deleteCommentForm" method="post" action="" style="display: inline;"> {# Action se llenará con JS #}
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                        <button type="submit" class="btn w-100" style="background-color: #000; color: #fff;">Publicar Comentario</button>
                     </form>
                 </div>
             </div>
-        </div>
-    </div>
+        {% else %}
+            <p class="text-center">Inicia sesión para poder dejar un comentario.</p>
+        {% endif %}
 
-    
-    {% if user.is_authenticated and user == receta.autor %}
-    <div class="modal fade" id="confirmDeleteRecetaModal" tabindex="-1" aria-labelledby="confirmDeleteRecetaModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="confirmDeleteRecetaModalLabel">Confirmar Eliminación de Receta</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        {% if comentarios %}
+            {% for comentario in comentarios %}
+                <div class="card mb-3 shadow-sm d-flex align-items-center" style="max-width: 800px; width: 100%; background-color: #E9D3B3;">
+                    <div class="card-body">
+                        <p class="card-text text-center">{{ comentario.texto }}</p>
+                        <footer class="blockquote-footer text-center">
+                            Por <cite title="Source Title">{{ comentario.usuario.username }}</cite>
+                            el {{ comentario.fecha_creacion|date:"d M Y H:i" }}
+                            {% if comentario.fecha_modificacion %}(Editado el {{ comentario.fecha_modificacion|date:"d M Y H:i" }}){% endif %}
+                        </footer>
+                        {% if user.is_authenticated and user == comentario.usuario or user.is_superuser %}
+                            <div class="mt-2 d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-sm"
+                                    style="background-color: #000; color: #fff;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editCommentModal"
+                                    data-comment-id="{{ comentario.pk }}"
+                                    data-comment-text="{{ comentario.texto }}"
+                                    data-edit-url="{% url 'recetas:comentario_editar' pk=0 %}">
+                                    Editar
+                                </button>
+                                <button type="button" class="btn btn-sm"
+                                    style="background-color: #000; color: #fff;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmDeleteCommentModal"
+                                    data-comment-id="{{ comentario.pk }}"
+                                    data-delete-url="{% url 'recetas:comentario_eliminar' pk=0 %}">
+                                    Eliminar
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="modal-body">
-                    ¿Estás seguro de que quieres eliminar la receta "{{ receta.titulo }}"? Esta acción no se puede deshacer.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <form action="{% url 'recetas:receta_eliminar' receta.pk %}" method="post" style="display: inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Sí, Eliminar Receta</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-center">No hay comentarios aún. ¡Sé el primero en comentar!</p>
+        {% endif %}
     </div>
-    {% endif %}
-
+</div>
 {% endblock contenido %}
 
 {% block extra_js %}
@@ -220,103 +141,4 @@
 </script>
 {% endblock extra_js %}
 
-    {% comment %} {# despues le agrego una hoja de stylos,lo mismo para el JS #}
-    <style>
-        /* Estos estilos son solo para demostrar, lo ideal es ponerlos en main.css */
-        .receta-detalle {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .receta-detalle h1, .receta-detalle h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .receta-detalle .img-detalle {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .receta-detalle p {
-            margin-bottom: 5px;
-            color: #555;
-        }
-        .receta-detalle h2 {
-            margin-top: 25px;
-            color: #444;
-        }
-        .receta-detalle .receta-cuerpo {
-            line-height: 1.6;
-            color: #333;
-        }
-        .btn-primary, .btn-success, .btn-warning, .btn-danger {
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: inline-block;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-success {
-            background-color: #28a745;
-            color: white;
-        }
-        .comentarios-seccion {
-            margin-top: 20px;
-        }
-        .comentario-item {
-            margin-bottom: 15px;
-            background-color: #f9f9f9;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .comentario-item p {
-            margin-bottom: 5px;
-        }
-        .comentario-item small {
-            color: #888;
-        }
-        /* Estilos para mensajes de Django */
-        ul.messages {
-            list-style-type: none;
-            padding: 0;
-            margin: 10px 0;
-        }
-        ul.messages li {
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            color: #333;
-            background-color: #d4edda; /* Default success */
-            border: 1px solid #c3e6cb;
-        }
-        ul.messages li.success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        ul.messages li.error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        ul.messages li.warning {
-            background-color: #fff3cd;
-            border-color: #ffeeba;
-            color: #856404;
-        }
-        ul.messages li.info {
-            background-color: #d1ecf1;
-            border-color: #bee5eb;
-            color: #0c5460;
-        }
-    </style> {% endcomment %}
+
