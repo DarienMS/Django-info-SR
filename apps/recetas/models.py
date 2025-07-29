@@ -1,8 +1,8 @@
 # apps/recetas/models.py
 from django.db import models
 from django.conf import settings 
-from django.utils import timezone 
-
+from django.utils import timezone
+from django.urls import reverse
 
 class Categoria(models.Model):
     nombre = models.CharField(max_length=60, unique=True) 
@@ -69,7 +69,8 @@ class Receta(models.Model):
 
     def __str__(self):
         return self.titulo
-
+    def get_absolute_url(self):
+         return reverse('recetas:detalle', kwargs={'pk': self.pk})
 
 class Comentario(models.Model):
     usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='Usuario')

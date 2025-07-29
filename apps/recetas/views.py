@@ -9,6 +9,9 @@ from django.db.models import Q
 from django.views import View
 from django.contrib import messages
 from django.utils import timezone
+from .forms import ComentarioForm
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 # Vista para crear una nueva receta
 class RecetaCreateView(LoginRequiredMixin, CreateView):
     model = Receta
@@ -84,24 +87,51 @@ class RecetaDetailView(DetailView):
         receta = self.get_object() 
         context['receta'] = receta 
 
-        
+      
+        comentarios_de_receta = receta.comentarios.filter(fecha_baja__isnull=True)
+        context['comentarios'] = comentarios_de_receta 
+       
+
+      
         print(f"\n--- Depuración para RecetaDetailView ---")
         print(f"Receta actual: {receta.titulo} (ID: {receta.pk})")
-        
-       
-        comentarios_de_receta = receta.comentarios.all() 
-        
         print(f"Número de comentarios cargados para esta receta: {comentarios_de_receta.count()}")
         if comentarios_de_receta.exists():
             for c in comentarios_de_receta:
-                print(f"  - Comentario ID: {c.pk}, Texto: '{c.texto}', Usuario: {c.usuario.username}, Fecha: {c.fecha}")
+                print(f"   - Comentario ID: {c.pk}, Texto: '{c.texto}', Usuario: {c.usuario.username}, Fecha: {c.fecha}")
         else:
-            print("  No se encontraron comentarios asociados a esta receta en la base de datos.")
+            print("   No se encontraron comentarios asociados a esta receta en la base de datos.")
         print(f"--- Fin Depuración ---\n")
-        # -------------------------------------
+       
 
-        return context   
+       
+        if 'comentario_form' not in context: 
+            context['comentario_form'] = ComentarioForm()
 
+        return context
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object() 
+        form = ComentarioForm(request.POST)
+
+        if form.is_valid():
+            comentario = form.save(commit=False)
+            comentario.receta = self.object  
+      
+            comentario.usuario = request.user  
+           
+            comentario.save() 
+
+            messages.success(request, "Tu comentario ha sido añadido con éxito.")
+            return HttpResponseRedirect(reverse('recetas:detalle', kwargs={'pk': self.object.pk}))
+
+        else:
+            context = self.get_context_data(**kwargs)
+            context['comentario_form'] = form 
+            messages.error(request, "Error al añadir el comentario. Por favor, revisa el formulario.")
+            return self.render_to_response(context)
+        
+        
+        
 class ComentarRecetaView(View):
     def post(self, request):
         if request.user.is_authenticated:
@@ -213,3 +243,50 @@ class RecetaReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
     
     def get(self, request, *args, **kwargs):
         return redirect(self.success_url)
+    
+class ComentarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comentario
+    form_class = ComentarioForm
+    template_name = 'recetas/comentario_form.html' 
+    context_object_name = 'comentario'
+
+    def get_success_url(self):
+      
+        return reverse_lazy('recetas:detalle', kwargs={'pk': self.object.receta.pk})
+
+    def test_func(self):
+
+        comentario = self.get_object()
+        return self.request.user == comentario.usuario
+
+    def handle_no_permission(self):
+        messages.error(self.request, "No tienes permiso para editar este comentario.")
+        return redirect(self.get_success_url()) 
+
+class ComentarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, View): 
+    def dispatch(self, request, *args, **kwargs):
+
+        self.comentario = get_object_or_404(Comentario, pk=self.kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+     
+        return self.request.user == self.comentario.usuario or self.request.user.is_superuser
+
+    def post(self, request, *args, **kwargs):
+       
+        comentario = self.comentario
+
+        
+        comentario.fecha_baja = timezone.now() 
+        comentario.usuario_baja = request.user 
+        comentario.save() 
+
+        messages.success(request, "Comentario eliminado lógicamente.")
+       
+        return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': comentario.receta.pk}))
+
+    def handle_no_permission(self):
+        messages.error(self.request, "No tienes permiso para eliminar este comentario.")
+       
+        return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': self.comentario.receta.pk}))

@@ -4,62 +4,221 @@
 {% block titulo %}{{ receta.titulo }}{% endblock titulo %}
 
 {% block contenido %}
-    <div class="receta-detalle">
-        <h1>{{ receta.titulo }}</h1>
-        {% if receta.imagen %}
-            <img src="{{ receta.imagen.url }}" alt="{{ receta.titulo }}" class="img-detalle">
-        {% else %}
-            <img src="{% static 'img/placeholder.png' %}" alt="Sin imagen" class="img-detalle">
-        {% endif %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <h1 class="mb-3">{{ receta.titulo }}</h1>
+                {% if receta.imagen %}
+                    <img src="{{ receta.imagen.url }}" class="img-fluid rounded mb-3" alt="Imagen de {{ receta.titulo }}" style="max-height: 400px; object-fit: cover;">
+                {% else %}
+                    <img src="{% static 'img/placeholder.png' %}" class="img-fluid rounded mb-3" alt="Sin imagen" style="max-height: 400px; object-fit: cover;">
+                {% endif %}
 
-        <p><strong>Autor:</strong> {{ receta.autor.username }}</p>
-        <p><strong>Fecha:</strong> {{ receta.fecha|date:"d M, Y" }}</p>
-        <p><strong>Categoría:</strong> {% if receta.categoria_receta %}{{ receta.categoria_receta.nombre }}{% else %}Sin categoría{% endif %}</p>
-      
-        <hr>
-        <h2>Preparación:</h2>
-        <div class="receta-cuerpo">
-            {{ receta.cuerpo|linebreaksbr }}
+                <p class="text-muted">Por: {{ receta.autor.username }}</p>
+                <p><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
+                <p><strong>Tipo:</strong> {{ receta.get_tipo_display }}</p>
+
+                <hr>
+
+                <h3>Ingredientes:</h3>
+                <p>{{ receta.ingredientes|linebreaksbr }}</p>
+
+                <h3>Preparación:</h3>
+                <p>{{ receta.cuerpo|linebreaksbr }}</p>
+
+                {% if user.is_authenticated and user == receta.autor %}
+                    <div class="mt-4">
+                        <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning me-2">Editar Receta</a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteRecetaModal">
+                            Eliminar Receta
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-4">
+           
+            </div>
         </div>
 
-        <br>
-        <a href="{% url 'recetas:listar' %}" class="btn btn-primary">Volver a la lista de Recetas</a>
-        
-        {% if user.is_authenticated and user == receta.autor %}
-           
-        {% endif %}
+        <hr class="mt-5">
 
-        <br>
-        <h3>Deja un comentario:</h3>
-        {% if user.is_authenticated %}
-            <form method="POST" action="{% url 'recetas:comentar' %}">
-                {% csrf_token %}
-                <input type="hidden" name="receta_id" value="{{ receta.pk }}">
-                <textarea name="comentario" maxlength="1500" placeholder="Escribe tu comentario aquí..." style="width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-                <button type="submit" class="btn btn-success" style="margin-top: 10px;">Comentar</button>
-            </form>
-        {% else %}
-            <p>Por favor, <a href="{% url 'login' %}">inicia sesión</a> para dejar un comentario.</p>
-        {% endif %}
-
-        <hr>
-        <h3>Comentarios ({{ receta.comentarios.count }}):</h3>
-        <div class="comentarios-seccion">
-            {% if receta.comentarios.all %}
-                {% for comentario in receta.comentarios.all %}
-                    <div class="comentario-item" style="border: 1px solid #eee; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
-                        <p><strong>{{ comentario.usuario.username }}</strong> - <small>{{ comentario.fecha|date:"d M, Y H:i" }}</small></p>
-                        <p>{{ comentario.texto|linebreaksbr }}</p>
+        <div class="comentarios-seccion mt-5">
+            <h3>Comentarios:</h3>
+            {# Formulario para agregar nuevo comentario #}
+            {% if user.is_authenticated %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Añadir un nuevo comentario:</h5>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ comentario_form.as_p }}
+                            <button type="submit" class="btn btn-primary">Publicar Comentario</button>
+                        </form>
                     </div>
-                {% empty %}
-                    <p>No hay comentarios para esta receta aún. ¡Sé el primero en comentar!</p>
-                {% endfor %}
+                </div>
             {% else %}
-                <p>No hay comentarios para esta receta aún. ¡Sé el primero en comentar!</p>
+                <p>Inicia sesión para poder dejar un comentario.</p>
+            {% endif %}
+
+            {# Lista de comentarios existentes #}
+            {% if comentarios %}
+             {% for comentario in comentarios %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text">{{ comentario.texto }}</p>
+            <footer class="blockquote-footer">
+              
+                Por <cite title="Source Title">{{ comentario.usuario.username }}</cite>
+                el {{ comentario.fecha_creacion|date:"d M Y H:i" }}
+                {% if comentario.fecha_modificacion %}(Editado el {{ comentario.fecha_modificacion|date:"d M Y H:i" }}){% endif %}
+            </footer>
+            {% if user.is_authenticated %}
+               
+                {% if user == comentario.usuario or user.is_superuser %} 
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-info edit-comment-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editCommentModal"
+                            data-comment-id="{{ comentario.pk }}"
+                            data-comment-text="{{ comentario.texto }}"
+
+                            data-edit-url="{% url 'recetas:comentario_editar' pk=0 %}">
+                            Editar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#confirmDeleteCommentModal"
+                            data-comment-id="{{ comentario.pk }}"
+                            
+                            data-delete-url="{% url 'recetas:comentario_eliminar' pk=0 %}"> 
+                            Eliminar
+                        </button>
+                    </div>
+                {% endif %}
             {% endif %}
         </div>
-
     </div>
+{% endfor %}
+              
+            {% else %}
+                <p>No hay comentarios aún. ¡Sé el primero en comentar!</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCommentModalLabel">Editar Comentario</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editCommentForm" method="post" action=""> {# Action se llenará con JS #}
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="commentTextInput" class="form-label">Tu comentario:</label>
+                            <textarea class="form-control" id="commentTextInput" name="texto" rows="5"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="confirmDeleteCommentModal" tabindex="-1" aria-labelledby="confirmDeleteCommentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteCommentModalLabel">Confirmar Eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que quieres eliminar este comentario?
+                    <p class="mt-2 text-muted" id="commentTextToDelete"></p> {# Aquí se mostrará el texto del comentario a eliminar #}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form id="deleteCommentForm" method="post" action="" style="display: inline;"> {# Action se llenará con JS #}
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    {% if user.is_authenticated and user == receta.autor %}
+    <div class="modal fade" id="confirmDeleteRecetaModal" tabindex="-1" aria-labelledby="confirmDeleteRecetaModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteRecetaModalLabel">Confirmar Eliminación de Receta</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de que quieres eliminar la receta "{{ receta.titulo }}"? Esta acción no se puede deshacer.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <form action="{% url 'recetas:receta_eliminar' receta.pk %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Sí, Eliminar Receta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock contenido %}
+
+{% block extra_js %}
+<script>
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const editCommentModal = document.getElementById('editCommentModal');
+        editCommentModal.addEventListener('show.bs.modal', function (event) {
+
+            const button = event.relatedTarget;
+  
+            const commentId = button.getAttribute('data-comment-id');
+            const commentText = button.getAttribute('data-comment-text');
+
+            const form = editCommentModal.querySelector('#editCommentForm');
+            const textarea = editCommentModal.querySelector('#commentTextInput');
+
+            form.action = `/Recetas/comentario/editar/${commentId}/`; 
+            textarea.value = commentText;
+        });
+
+
+        const deleteCommentModal = document.getElementById('confirmDeleteCommentModal');
+        deleteCommentModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const commentId = button.getAttribute('data-comment-id');
+            
+            const commentCardBody = button.closest('.card-body');
+            const commentTextElement = commentCardBody ? commentCardBody.querySelector('.card-text') : null;
+            const commentText = commentTextElement ? commentTextElement.textContent : 'el comentario seleccionado';
+
+            const form = deleteCommentModal.querySelector('#deleteCommentForm');
+            const textDisplay = deleteCommentModal.querySelector('#commentTextToDelete');
+
+            form.action = `/Recetas/comentario/eliminar/${commentId}/`; // Ajusta la URL según tu configuración
+            textDisplay.textContent = `"${commentText.substring(0, 100)}${commentText.length > 100 ? '...' : ''}"`; // Truncar si es muy largo
+        });
+    });
+</script>
+{% endblock extra_js %}
 
     {% comment %} {# despues le agrego una hoja de stylos,lo mismo para el JS #}
     <style>
@@ -161,4 +320,3 @@
             color: #0c5460;
         }
     </style> {% endcomment %}
-{% endblock contenido %}

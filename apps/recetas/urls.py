@@ -18,7 +18,7 @@ urlpatterns = [
     path('receta/habilitar/<int:pk>/', views.RecetaReactivateView.as_view(), name='receta_habilitar'),
 
    
-#   path('comentario/editar/<int:pk>/', views.ComentarioUpdateView.as_view(), name='comentario_editar'),
-#     path('comentario/eliminar/<int:pk>/', views.ComentarioDeleteView.as_view(), name='comentario_eliminar'),
-    # path('comentario/habilitar/<int:pk>/', views.ComentarioReactivateView.as_view(), name='comentario_habilitar'),
+  path('comentario/editar/<int:pk>/', views.ComentarioUpdateView.as_view(), name='comentario_editar'),
+    path('comentario/eliminar/<int:pk>/', views.ComentarioDeleteView.as_view(), name='comentario_eliminar'),
+    
 ]
