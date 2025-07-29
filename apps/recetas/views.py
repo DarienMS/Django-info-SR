@@ -73,7 +73,22 @@ class MisRecetasListView(LoginRequiredMixin, ListView):
     context_object_name = 'mis_recetas'
     ordering = ['-fecha']
     paginate_by = 10
+    def dispatch(self, request, *args, **kwargs):
+        
+        response = super().dispatch(request, *args, **kwargs)
+        
+       
+        user_recipes_count = Receta.objects.filter(autor=request.user).count()
 
+        if user_recipes_count == 0:
+          
+            messages.info(request, "Aún no tienes recetas publicadas. ¡Crea tu primera receta para verla aquí!")
+         
+            return redirect(reverse_lazy('recetas:listar'))
+        
+        
+        return response 
+    
     def get_queryset(self):
         return Receta.objects.filter(autor=self.request.user).order_by('-fecha')
 
