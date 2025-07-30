@@ -46,9 +46,9 @@
 
             {# Enlaces de usuario - también dentro del menú que se colapsa #}
             {% if user.is_authenticated %}
-              <li class="nav-item">
+              {% comment %} <li class="nav-item">
                 <a class="nav-link" href="{% url 'recetas:mis_recetas' %}">Mis Recetas</a>
-              </li>
+              </li> {% endcomment %}
               {% if user.is_superuser %}
               <li class="nav-item">
                 <a href="{% url 'admin:index' %}" target="_blank" class="nav-link">Panel Admin Django</a>

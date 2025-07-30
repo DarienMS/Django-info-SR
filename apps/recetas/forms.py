@@ -9,6 +9,7 @@ class RecetaForm(forms.ModelForm):
         fields = [
             'titulo',
             'cuerpo',
+            'ingredientes',
             'imagen',
             'categoria_receta',
           
@@ -17,12 +18,14 @@ class RecetaForm(forms.ModelForm):
 
         labels = {
             'titulo': 'Título de la Receta',
-            'cuerpo': 'Ingredientes e Instrucciones',
+            'cuerpo': 'Instrucciones',
+             'ingredientes': 'Ingredientes Necesarios',
             'imagen': 'Imagen de la Receta',
             'categoria_receta': 'Categoría',
         }
 
         widgets = {
+             'ingredientes': forms.Textarea(attrs={'rows': 6, 'placeholder': 'Ej: 2 tazas de harina, 1 huevo, 1/2 litro de leche...'}),
             'cuerpo': forms.Textarea(attrs={'rows': 8}),
         }
 

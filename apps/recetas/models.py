@@ -38,6 +38,10 @@ class Categoria(models.Model):
 class Receta(models.Model):
     titulo = models.CharField(max_length=150)
     cuerpo = models.TextField()
+    ingredientes = models.TextField(
+        blank=True, 
+        help_text="Lista de ingredientes, separados por comas, puntos o en líneas diferentes."
+    )
     imagen = models.ImageField(upload_to='recetas_imagenes/', blank=True, null=True)
 
     categoria_receta = models.ForeignKey(
