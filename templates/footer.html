@@ -1,0 +1,32 @@
+<footer class="footer mt-auto py-3">
+    <div class="container text-center">
+        <span class="text-muted">
+            &copy; {% now "Y" %} CocinaRebeldeApp. Todos los derechos reservados.
+            <br>
+            Desarrollado por Sintaxis Rebelde.
+        </span>
+        <div class="mt-2">
+            <a href="" class="text-muted text-decoration-none mx-2">Contacto</a> | 
+            <a href="" class="text-muted text-decoration-none mx-2">Acerca de</a>
+            {# Puedes añadir más enlaces aquí, por ejemplo, a redes sociales #}
+        </div>
+    </div>
+</footer>
+
+<style>
+/* Estilos adicionales para el footer, si no quieres que sean globales */
+.footer {
+    background-color: #E9D3B3; /* Coincide con el color del nav y la tarjeta de listado */
+    color: #5d4037; /* Color de texto más oscuro para contraste */
+}
+
+.footer a {
+    color: #5d4037; /* Asegura que los enlaces tengan el color del texto */
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #333; /* Un poco más oscuro al pasar el ratón */
+    text-decoration: underline;
+}
+</style>

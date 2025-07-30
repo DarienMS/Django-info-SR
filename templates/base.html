@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}" />
   </head>
 
-  <body class="contenedor">
+  <body class="d-flex flex-column min-vh-100"> {# ¡CAMBIO CLAVE AQUÍ! Añade d-flex flex-column min-vh-100 #}
 
     {# CAMBIOS EN LA BARRA DE NAVEGACIÓN: #}
     {# 1. Se eliminaron 'navbar-light' y 'bg-light' para que tome el color de main.css (body nav) #}
@@ -77,24 +77,32 @@
       </div>
     </nav>
 
-    {# BLOQUE DE MENSAJES #}
-    <div class="container mt-3" style="margin-top: 100px !important;"> {# Ajusta el margen si la navbar lo cubre #}
-        {% if messages %}
-            <div class="messages-container"> 
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
+    {# Nuevo contenedor principal para el contenido que empujará el footer #}
+    <main class="flex-shrink-0"> {# ¡CAMBIO CLAVE AQUÍ! Envuelve tu contenido en <main class="flex-shrink-0"> #}
 
-    <div class="bloque">
-        {% block contenido %}
-        {% endblock contenido %}
-    </div>
+        {# BLOQUE DE MENSAJES #}
+        <div class="container mt-3" style="margin-top: 100px !important;"> {# Ajusta el margen si la navbar lo cubre #}
+            {% if messages %}
+                <div class="messages-container"> 
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="bloque"> {# Este div es el que usas para envolver el contenido #}
+            {% block contenido %}
+            {% endblock contenido %}
+        </div>
+
+    </main> {# CIERRA LA ETIQUETA main #}
+
+    {# Incluye el footer al final del body, antes de los scripts de JS. La ruta es 'templates/footer.html' #}
+    {% include 'footer.html' %} {# OJO: Si lo pones en 'templates/footer.html', la ruta es solo 'footer.html' #}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
