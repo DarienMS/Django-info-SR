@@ -1,10 +1,134 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block titulo %}NOSOTROS{% endblock titulo %}
-
+{% block titulo %}Nosotros{% endblock titulo %}
 
 {% block contenido %}
-	<h2>NOSOTROS</h2>
-{% endblock contenido %}
+<div class="container my-5">
+    <h1 class="text-center mb-5 display-4">Conoce a Nuestro Equipo</h1>
 
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4 justify-content-center">
+      
+        <div class="col">
+            <div class="card h-100 nosotros-card shadow-sm">
+                <div class="profile-img-container"> 
+                    <img src="{% static 'img/adrian.jfif' %}" class="nosotros-img" alt="Foto de Miembro 1">
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Adrián Navarro</h5> 
+                    <p class="card-text text-muted">Desarrollador Full Stack</p> 
+                    <p class="card-text">
+                      Soy Programador Full Stack y Analista de datos, soy de Barranqueras-Chaco,recibido de la UNNE en la carrera de Lic en Sistemas.No me pidan hacer Deploy los viernes,los viernes es de Cerveza.
+                    </p>
+                    <a href="{% static 'cv/cv_miembro1.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
+                        Descargar CV <i class="fas fa-download"></i>
+                    </a>
+                    <div class="social-icons mt-3">
+                        <a href="https://www.linkedin.com/in/adrian-navarro-arg/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-linkedin fa-2x"></i>
+                        </a>
+                        <a href="https://www.instagram.com/adrinavarrolbdo/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                        <a href="https://wa.me/+543794921315" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      
+        <div class="col">
+            <div class="card h-100 nosotros-card shadow-sm">
+                <div class="profile-img-container"> 
+                    <img src="{% static 'img/miembro2.jpg' %}" class="nosotros-img" alt="Foto de Miembro 2">
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Nombre del Miembro 2</h5>
+                    <p class="card-text text-muted">Rol en el Equipo: Diseñador UI/UX</p>
+                    <p class="card-text">
+                        Aquí puedes poner una descripción concisa sobre el Miembro 2.
+                        Destaca su experiencia o contribuciones.
+                    </p>
+                    <a href="{% static 'cv/cv_miembro2.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
+                        Descargar CV <i class="fas fa-download"></i>
+                    </a>
+                    <div class="social-icons mt-3">
+                        <a href="https://www.linkedin.com/in/nombre-del-miembro2/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-linkedin fa-2x"></i>
+                        </a>
+                        <a href="https://www.instagram.com/usuario_miembro2/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                        <a href="https://wa.me/XXXXXXXXXXX" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="col">
+            <div class="card h-100 nosotros-card shadow-sm">
+                <div class="profile-img-container"> 
+                    <img src="{% static 'img/miembro3.jpg' %}" class="nosotros-img" alt="Foto de Miembro 3">
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Nombre del Miembro 3</h5>
+                    <p class="card-text text-muted">Rol en el Equipo: Desarrollador Frontend</p>
+                    <p class="card-text">
+                        Describe brevemente a tu tercer miembro del equipo. Puedes añadir un toque personal o profesional.
+                    </p>
+                    <a href="" class="btn btn-primary btn-sm mt-2" download>
+                        Descargar CV <i class="fas fa-download"></i>
+                    </a>
+                    <div class="social-icons mt-3">
+                        <a href="https://www.linkedin.com/in/nombre-del-miembro3/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-linkedin fa-2x"></i>
+                        </a>
+                        <a href="https://www.instagram.com/usuario_miembro3/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                        <a href="https://wa.me/XXXXXXXXXXX" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+       
+        <div class="col">
+            <div class="card h-100 nosotros-card shadow-sm">
+                <div class="profile-img-container"> 
+                    <img src="{% static 'img/miembro4.jpg' %}" class="nosotros-img" alt="Foto de Miembro 4">
+                </div>
+                <div class="card-body text-center">
+                    <h5 class="card-title">Nombre del Miembro 4</h5>
+                    <p class="card-text text-muted">Rol en el Equipo: Content Creator</p>
+                    <p class="card-text">
+                        Texto de presentación para el cuarto miembro del equipo.
+                        Enfócate en sus habilidades y su impacto en el proyecto.
+                    </p>
+                    <a href="{% static 'cv/cv_miembro4.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
+                        Descargar CV <i class="fas fa-download"></i>
+                    </a>
+                    <div class="social-icons mt-3">
+                        <a href="https://www.linkedin.com/in/nombre-del-miembro4/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-linkedin fa-2x"></i>
+                        </a>
+                        <a href="https://www.instagram.com/usuario_miembro4/" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-instagram fa-2x"></i>
+                        </a>
+                        <a href="https://wa.me/XXXXXXXXXXX" target="_blank" class="mx-2 text-decoration-none">
+                            <i class="fab fa-whatsapp fa-2x"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}
