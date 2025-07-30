@@ -24,6 +24,13 @@
       </div>
       <button type="submit" class="btn w-100" style="background-color: #000; color: #fff;">Ingresar</button>
     </form>
+
+    {# --- AÑADIMOS ESTO AQUÍ --- #}
+    <p class="text-center mt-3">
+      ¿No tienes usuario? <a href="{% url 'usuarios:registro' %}" class="text-decoration-none">Regístrate</a>
+    </p>
+    {# --- FIN DE LO AÑADIDO --- #}
+
   </div>
 </div>
 {% endblock %}
