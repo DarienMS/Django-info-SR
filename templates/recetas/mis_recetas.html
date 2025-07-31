@@ -5,6 +5,24 @@
 {% block title %}Mis Recetas{% endblock title %}
 
 {% block contenido %}
+
+<div class="container mt-4">
+        <div class="card shadow p-4" style="background-color: #fce4c2;">
+            <h3 class="mb-4 text-center">Gestion de Recetas</h3>
+            <div class="d-inline-flex justify-content-center align-items-center gap-3 w-100">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success" style="min-width: 200px;">
+                        Agregar Receta
+                    </a>
+                    <a href="{% url 'recetas:listar' %}" class="btn btn-warning" style="min-width: 200px;">
+                        Todas las Recetas
+                    </a>
+                {% else %}
+                    <p class="text-center">Inicia sesión para agregar nuevas recetas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 <main role="main">
     <div class="container mt-4">
         <h1 class="mb-4">Mis Recetas</h1>
@@ -42,22 +60,33 @@
                         {% endif %}
                         <p class="card-text">{{ receta.cuerpo|truncatechars:100 }}</p>
                         <div class="mt-auto d-flex justify-content-between">
-                            <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-info btn-sm">Ver</a>
+                            {# Botón VER (Lupa) #}
+                            <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-success btn-sm" title="Ver Receta">
+                                <i class="fas fa-search"></i> {# Ícono de Lupa #}
+                            </a>
                             
                             {% if not receta.fecha_baja %} {# Solo mostrar Modificar y Eliminar si NO está de baja #}
-                                 <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning btn-sm">Modificar</a>
+                                {# Botón MODIFICAR (Lápiz) #}
+                                <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning btn-sm mx-1" title="Modificar Receta">
+                                    <i class="fas fa-edit"></i> {# Ícono de Lápiz #}
+                                </a>
+                                {# Botón ELIMINAR (Basura) #}
                                 <button type="button" class="btn btn-danger btn-sm"
                                     data-bs-toggle="modal"
                                     data-bs-target="#confirmDeleteModal"
                                     data-receta-id="{{ receta.pk }}"
-                                    data-receta-titulo="{{ receta.titulo }}">
-                                    Eliminar
+                                    data-receta-titulo="{{ receta.titulo }}"
+                                    title="Dar de Baja Receta">
+                                    <i class="fas fa-trash-alt"></i> {# Ícono de Basura #}
                                 </button>
                             {% else %} {# Mostrar Habilitar si SÍ está de baja #}
-                              
+                                {# Botón HABILITAR (con un ícono de "check" o "refresh") #}
                                 <form action="{% url 'recetas:receta_habilitar' receta.pk %}" method="post" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-sm">Habilitar</button>
+                                    <button type="submit" class="btn btn-success btn-sm" title="Habilitar Receta">
+                                        <i class="fas fa-check-circle"></i> {# Ícono de Check #}
+                                        {# Puedes usar <i class="fas fa-redo"></i> para "rehacer/refrescar" también #}
+                                    </button>
                                 </form>
                             {% endif %}
                         </div>
@@ -67,7 +96,7 @@
             {% endfor %}
         </div>
 
-       
+        
         {% if is_paginated %}
         <nav aria-label="Page navigation example" class="mt-4">
             <ul class="pagination justify-content-center">
@@ -133,7 +162,8 @@
 
         var deleteForm = confirmDeleteModal.querySelector('#deleteForm');
         
-        deleteForm.action = `/Recetas/receta/eliminar/${recetaId}/`; 
+        // Asegúrate de que esta URL sea la correcta según tu urls.py
+        deleteForm.action = `/Recetas/eliminar/${recetaId}/`; 
     });
 </script>
 {% endblock extra_js %}
