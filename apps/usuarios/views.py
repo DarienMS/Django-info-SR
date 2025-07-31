@@ -71,23 +71,23 @@ class UsuarioActivarView(UserPassesTestMixin, UpdateView):
         return redirect(self.success_url)
     
 class UsuarioUpdateView(UserPassesTestMixin, UpdateView):
-    model = Usuario 
+    model = Usuario
     
-    fields = ['first_name', 'last_name', 'email', 'is_staff', 'is_active', 'is_superuser']
-    template_name = 'usuarios/usuario_editar.html' 
+    # CORRECCIÓN: Quitamos 'is_superuser' de la lista de campos
+    fields = ['first_name', 'last_name', 'email', 'is_staff', 'is_active']
+    
+    template_name = 'usuarios/usuario_editar.html'
     success_url = reverse_lazy('usuarios:lista_usuarios')
 
     def test_func(self):
-       
+        # Permite la edición solo a superusuarios
         return self.request.user.is_superuser
 
     def form_valid(self, form):
-      
         messages.success(self.request, f'Usuario "{form.instance.username}" actualizado exitosamente.')
         return super().form_valid(form)
 
     def handle_no_permission(self):
-       
         messages.error(self.request, 'No tienes permiso para editar usuarios.')
         return redirect('home')
     

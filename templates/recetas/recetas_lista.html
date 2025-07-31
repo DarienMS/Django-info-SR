@@ -1,0 +1,157 @@
+{# apps/recetas/templates/recetas/lista_recetas_admin.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Administración de Recetas{% endblock title %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Panel de Administración de Recetas</h2>
+    
+    <div class="mb-3 text-end">
+        <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Agregar Nueva Receta
+        </a>
+    </div>
+
+    {% if recetas %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Título</th>
+                    <th>Autor</th>
+                    <th>Estado</th>
+                    <th>Fecha de Alta</th>
+                    <th>Categoría</th>
+                    <th>Fecha de Baja</th> 
+                    <th>Usuario de Baja</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for receta in recetas %}
+                <tr>
+                    <td>{{ receta.pk }}</td>
+                    <td>{{ receta.titulo }}</td>
+                    <td>{{ receta.autor.username }}</td>
+                    <td>
+                        {% if receta.fecha_baja %}
+                        <span class="badge bg-danger">Inactiva</span>
+                        {% else %}
+                        <span class="badge bg-success">Activa</span>
+                        {% endif %}
+                    </td>
+                      <td>{{ receta.categoria_receta.nombre }}</td>
+                    <td>{{ receta.fecha|date:"d M Y" }}</td> {# CORRECCIÓN: CAMBIADO A receta.fecha #}
+                    <td>{{ receta.fecha_baja |date:"d M Y" }}</td>
+                    <td>{{ receta.usuario_baja.username }}</td>
+                  
+                
+                    <td class="text-nowrap">
+                        {# Botón para ver la receta #}
+                        <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-success btn-sm me-1" title="Ver Receta">
+                            <i class="fas fa-search"></i>
+                        </a>
+                        {# Botón para editar la receta #}
+                        <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Receta">
+                            <i class="fas fa-edit"></i>
+                        </a>
+
+                        {# Botones para Desactivar/Activar #}
+                        {% if not receta.fecha_baja %}
+                        {# Botón Deshabilitar #}
+                        <button type="button" 
+                            class="btn btn-danger btn-sm" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#confirmActionModal" 
+                            data-receta-id="{{ receta.pk }}" 
+                            data-receta-titulo="{{ receta.titulo }}" 
+                            data-action-type="desactivar" 
+                            title="Dar de Baja Receta">
+                            <i class="fas fa-ban"></i>
+                        </button>
+                        {% else %}
+                        {# Botón Habilitar #}
+                        <button type="button" 
+                            class="btn btn-success btn-sm" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#confirmActionModal" 
+                            data-receta-id="{{ receta.pk }}" 
+                            data-receta-titulo="{{ receta.titulo }}" 
+                            data-action-type="activar" 
+                            title="Habilitar Receta">
+                            <i class="fas fa-check-circle"></i>
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="alert alert-info text-center">No hay recetas registradas.</p>
+    {% endif %}
+</div>
+
+{# --- Modal de Confirmación para Desactivar/Activar Recetas --- #}
+<div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="confirmActionModalLabel">Confirmar Acción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">¿Estás seguro de que quieres realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <form id="actionForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn" id="confirmButton">
+                        <i class="fas fa-check me-1"></i> Confirmar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmActionModal = document.getElementById('confirmActionModal');
+        confirmActionModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var recetaId = button.getAttribute('data-receta-id');
+            var recetaTitulo = button.getAttribute('data-receta-titulo');
+            var actionType = button.getAttribute('data-action-type');
+
+            var modalTitle = confirmActionModal.querySelector('.modal-title');
+            var modalMessage = confirmActionModal.querySelector('#modalMessage');
+            var confirmButton = confirmActionModal.querySelector('#confirmButton');
+            var actionForm = confirmActionModal.querySelector('#actionForm');
+
+            if (actionType === 'desactivar') {
+                modalTitle.textContent = 'Dar de Baja Receta';
+                modalMessage.textContent = `¿Estás seguro de que quieres dar de baja la receta "${recetaTitulo}" (ID: ${recetaId})? La receta ya no será visible para el público.`;
+                confirmButton.innerHTML = '<i class="fas fa-check me-1"></i> Sí, dar de baja';
+                confirmButton.className = 'btn btn-danger';
+                actionForm.action = `/Recetas/eliminar/${recetaId}/`;
+            } else if (actionType === 'activar') {
+                modalTitle.textContent = 'Habilitar Receta';
+                modalMessage.textContent = `¿Estás seguro de que quieres habilitar la receta "${recetaTitulo}" (ID: ${recetaId})? La receta volverá a estar visible para el público.`;
+                confirmButton.innerHTML = '<i class="fas fa-check me-1"></i> Sí, habilitar';
+                confirmButton.className = 'btn btn-success';
+                actionForm.action = `/Recetas/habilitar/${recetaId}/`;
+            }
+        });
+    });
+</script>
+{% endblock extra_js %}

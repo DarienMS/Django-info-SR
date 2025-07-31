@@ -1,0 +1,116 @@
+{# apps/recetas/templates/recetas/lista_comentarios_admin.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Administración de Comentarios{% endblock title %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Panel de Administración de Comentarios</h2>
+    
+    {% if comentarios %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Comentario</th>
+                    <th>Autor</th>
+                    <th>Receta</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Fecha de Baja</th> 
+                    <th>Usuario de Baja</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comentario in comentarios %}
+                <tr>
+                    <td>{{ comentario.pk }}</td>
+                    <td>{{ comentario.texto|truncatechars:100 }}</td>
+                    <td>{{ comentario.usuario.username }}</td>
+                    <td><a href="{% url 'recetas:detalle' comentario.receta.pk %}">{{ comentario.receta.titulo }}</a></td>
+                    <td>{{ comentario.fecha|date:"d M Y H:i" }}</td>
+                    <td>
+                        {% if comentario.fecha_baja %}
+                        <span class="badge bg-danger">Inactiva</span>
+                        {% else %}
+                        <span class="badge bg-success">Activa</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ comentario.fecha_baja|date:"d M Y H:i" }}</td>
+                    <td>{{ comentario.usuario_baja.username }}</td>
+                    <td class="text-nowrap">
+                        {# Botón para editar el comentario #}
+                        <a href="{% url 'recetas:comentario_editar' comentario.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Comentario">
+                            <i class="fas fa-edit"></i>
+                        </a>
+
+                        {# Botón para eliminar el comentario (con modal de confirmación) #}
+                        <button type="button" 
+                            class="btn btn-danger btn-sm" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#confirmDeleteModal" 
+                            data-comentario-id="{{ comentario.pk }}" 
+                            data-comentario-texto="{{ comentario.texto|truncatechars:30 }}" 
+                            title="Eliminar Comentario">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="alert alert-info text-center">No hay comentarios registrados.</p>
+    {% endif %}
+</div>
+
+{# --- Modal de Confirmación para Eliminar Comentario --- #}
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteModalMessage">¿Estás seguro de que quieres eliminar este comentario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <form id="deleteCommentForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteButton">
+                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var comentarioId = button.getAttribute('data-comentario-id');
+            var comentarioTexto = button.getAttribute('data-comentario-texto');
+
+            var modalMessage = confirmDeleteModal.querySelector('#deleteModalMessage');
+            var deleteCommentForm = confirmDeleteModal.querySelector('#deleteCommentForm');
+            var confirmDeleteButton = confirmDeleteModal.querySelector('#confirmDeleteButton');
+
+            modalMessage.textContent = `¿Estás seguro de que quieres eliminar el comentario "${comentarioTexto}" (ID: ${comentarioId})?`;
+            deleteCommentForm.action = `/Recetas/comentario/eliminar/${comentarioId}/`; // URL de tu vista de eliminación
+        });
+    });
+</script>
+{% endblock extra_js %}

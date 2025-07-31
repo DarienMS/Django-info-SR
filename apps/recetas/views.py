@@ -12,6 +12,7 @@ from django.utils import timezone
 from .forms import ComentarioForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+
 # Vista para crear una nueva receta
 class RecetaCreateView(LoginRequiredMixin, CreateView):
     model = Receta
@@ -306,3 +307,33 @@ class ComentarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
        
         return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': self.comentario.receta.pk}))
     
+
+
+class RecetasAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Receta
+    template_name = 'recetas/recetas_lista.html'
+    context_object_name = 'recetas'
+
+    # Método de UserPassesTestMixin para verificar si el usuario es superusuario
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    # Este método sobrescribe el comportamiento por defecto para obtener todas las recetas,
+    # incluyendo las inactivas, para el panel de administración.
+    def get_queryset(self):
+        return Receta.objects.all().order_by('-fecha')
+    
+    
+class ComentariosAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Comentario
+    template_name = 'recetas/lista_comentarios.html'
+    context_object_name = 'comentarios'
+
+    def test_func(self):
+        # Solo los superusuarios pueden ver este panel
+        return self.request.user.is_superuser
+    
+    def get_queryset(self):
+        # Obtiene todos los comentarios, ordenados por los más recientes
+        # La tabla de tu modelo Comentario tiene un campo 'fecha'
+        return Comentario.objects.all().order_by('-fecha')
