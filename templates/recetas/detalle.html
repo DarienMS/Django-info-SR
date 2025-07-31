@@ -4,6 +4,97 @@
 {% block titulo %}{{ receta.titulo }}{% endblock titulo %}
 
 {% block contenido %}
+
+
+
+
+{# MODAL DE EDICIÓN DE COMENTARIO #}
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Editar Comentario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editCommentForm" method="post" action=""> {# action se llena con JS #}
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="commentTextInput" class="form-label">Tu Comentario:</label>
+                        <textarea class="form-control" id="commentTextInput" name="texto" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {# Botón CANCELAR - Cruz en Gris #}
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> {# Ícono de cruz simple #}
+                    </button>
+                    {# Botón GUARDAR CAMBIOS - Check en Verde #}
+                    <button type="submit" class="btn btn-success"> {# Cambiado a btn-success para verde #}
+                        <i class="fas fa-check me-1"></i>  {# Ícono de check simple #}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE COMENTARIO #}
+<div class="modal fade" id="confirmDeleteCommentModal" tabindex="-1" aria-labelledby="confirmDeleteCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="confirmDeleteCommentModalLabel">Confirmar Eliminación de Comentario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que quieres eliminar el siguiente comentario?
+                <p class="mt-2 text-muted small" id="commentTextToDelete"></p>
+                <p class="text-danger small">Esta acción es irreversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+					<i class="fas fa-times me-1"></i>
+				</button>
+                <form id="deleteCommentForm" method="post" action=""> {# action se llena con JS #}
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+						 <i class="fas fa-check me-1"></i>
+					</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+<div class="container mt-4">
+        <div class="card shadow p-4" style="background-color: #fce4c2;">
+            <h3 class="mb-4 text-center">Gestion de Recetas</h3>
+            <div class="d-inline-flex justify-content-center align-items-center gap-3 w-100">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success" style="min-width: 200px;">
+                        Agregar Receta
+                    </a>
+                    <a href="{% url 'recetas:listar' %}" class="btn btn-warning" style="min-width: 200px;">
+                        Todas las Recetas
+                    </a>
+					 <a href="{% url 'recetas:mis_recetas' %}" class="btn btn-primary" style="min-width: 200px;">
+                        Mis Recetas
+                    </a>
+                {% else %}
+                    <p class="text-center">Inicia sesión para agregar nuevas recetas.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 <div class="container d-flex flex-column align-items-center justify-content-center mt-4">
     <div class="row w-100 justify-content-center">
         <div class="col-lg-8 col-md-10">
@@ -17,7 +108,7 @@
 
                 <p class="text-muted text-center">Por: {{ receta.autor.username }}</p>
                 <p class="text-center"><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
-                <p class="text-center"><strong>Tipo:</strong> {{ receta.get_tipo_display }}</p>
+                
 
                 <hr>
 

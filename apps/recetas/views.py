@@ -305,3 +305,4 @@ class ComentarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
         messages.error(self.request, "No tienes permiso para eliminar este comentario.")
        
         return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': self.comentario.receta.pk}))
+    
