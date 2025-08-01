@@ -20,5 +20,8 @@ urlpatterns = [
    
   path('comentario/editar/<int:pk>/', views.ComentarioUpdateView.as_view(), name='comentario_editar'),
     path('comentario/eliminar/<int:pk>/', views.ComentarioDeleteView.as_view(), name='comentario_eliminar'),
+     path('panel-admin/', views.RecetasAdminListView.as_view(), name='recetas_lista'),
+      path('panel-admin-comentarios/', views.ComentariosAdminListView.as_view(), name='lista_comentarios_admin'), # Nueva URL
+
     
 ]

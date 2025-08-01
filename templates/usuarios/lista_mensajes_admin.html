@@ -1,0 +1,177 @@
+{# apps/usuarios/templates/usuarios/mensajes_admin.html #}
+{% extends 'base.html' %}
+
+{% block title %}Panel de Mensajes Admin{% endblock title %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4">Panel de Mensajes de Usuarios</h2>
+   
+       
+    {# Inicio del bloque de filtros de búsqueda #}
+    <div class="card mb-4">
+        <div class="card-header">
+            Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="id_search" class="form-label">Buscar por Mensaje o Motivo</label>
+                        <input type="text" name="q" id="id_search" class="form-control" placeholder="Escribe tu búsqueda..." value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_remitente" class="form-label">Remitente</label>
+                        <select name="remitente" id="id_remitente" class="form-select">
+                            <option value="">Todos</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.pk }}" {% if usuario.pk|stringformat:"s" == remitente_id %}selected{% endif %}>
+                                    {{ usuario.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="id_estado" class="form-label">Estado</label>
+                        <select name="estado" id="id_estado" class="form-select">
+                            <option value="">Todos</option>
+                            <option value="pendiente" {% if estado_status == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                            <option value="respondido" {% if estado_status == 'respondido' %}selected{% endif %}>Respondido</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary" title="Buscar">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <a href="{% url 'usuarios:lista_mensajes_admin' %}" class="btn btn-warning" title="Limpiar Filtros">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+   
+    {# Fin del bloque de filtros #}
+    {% if mensajes_admin %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Remitente</th>
+                    <th>Motivo</th>
+                    <th>Mensaje</th>
+                    <th>Fecha de Envío</th>
+                    <th>Respuesta</th>
+                    <th>Fecha de Respuesta</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mensaje in mensajes_admin %}
+                <tr>
+                    <td>{{ mensaje.id }}</td>
+                    <td>
+                        {% if mensaje.estado == 'respondido' %}
+                            <span class="badge bg-success">Respondido</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ mensaje.remitente.username }}</td>
+                    <td>{{ mensaje.motivo }}</td>
+                    <td>{{ mensaje.mensaje|truncatechars:50 }}</td>
+                    <td>{{ mensaje.fecha_envio|date:"d M Y H:i" }}</td>
+                    <td>{{ mensaje.respuesta|default:"-" }}</td>
+                    <td>{% if mensaje.fecha_respuesta %}{{ mensaje.fecha_respuesta|date:"d M Y H:i" }}{% else %}-{% endif %}</td>
+                    <td>
+                        {% if mensaje.estado == 'respondido' %}
+                            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalVer{{ mensaje.id }}">
+                                <i class="fas fa-eye"></i> 
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalResponder{{ mensaje.id }}">
+                                <i class="fas fa-reply"></i> 
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="alert alert-info">No hay mensajes de usuarios para mostrar.</p>
+    {% endif %}
+</div>
+
+{% for mensaje in mensajes_admin %}
+    {% if mensaje.estado != 'respondido' %}
+    <div class="modal fade" id="modalResponder{{ mensaje.id }}" tabindex="-1" aria-labelledby="modalResponderLabel{{ mensaje.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalResponderLabel{{ mensaje.id }}">Responder a {{ mensaje.remitente.username }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Motivo:</strong> {{ mensaje.motivo }}</p>
+                    <p><strong>Enviado el:</strong> {{ mensaje.fecha_envio|date:"d M Y H:i" }}</p>
+                    <hr>
+                    <p><strong>Mensaje Original:</strong></p>
+                    <div class="alert alert-info">
+                        {{ mensaje.mensaje }}
+                    </div>
+                    
+                    <form id="formResponder{{ mensaje.id }}" method="post" action="{% url 'usuarios:responder_mensaje_admin' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="mensaje_id" value="{{ mensaje.id }}">
+                        <div class="mb-3">
+                            <label for="respuesta{{ mensaje.id }}" class="form-label">Tu Respuesta:</label>
+                            <textarea class="form-control" id="respuesta{{ mensaje.id }}" name="respuesta" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" form="formResponder{{ mensaje.id }}" class="btn btn-success">Enviar Respuesta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if mensaje.estado == 'respondido' %}
+    <div class="modal fade" id="modalVer{{ mensaje.id }}" tabindex="-1" aria-labelledby="modalVerLabel{{ mensaje.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalVerLabel{{ mensaje.id }}">Detalles del Mensaje de {{ mensaje.remitente.username }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Motivo:</strong> {{ mensaje.motivo }}</p>
+                    <p><strong>Enviado el:</strong> {{ mensaje.fecha_envio|date:"d M Y H:i" }}</p>
+                    <hr>
+                    <p><strong>Mensaje Original:</strong></p>
+                    <div class="alert alert-info">
+                        {{ mensaje.mensaje }}
+                    </div>
+                    <hr>
+                    <p><strong>Respuesta del Admin:</strong></p>
+                    <div class="alert alert-success">
+                        {{ mensaje.respuesta }}
+                    </div>
+                    <p class="text-muted text-end">Respondido por {{ mensaje.usuario_respuesta.username }} el {{ mensaje.fecha_respuesta|date:"d M Y H:i" }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+{% endblock contenido %}

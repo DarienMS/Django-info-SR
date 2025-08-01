@@ -1,0 +1,158 @@
+{# apps/recetas/templates/recetas/lista_comentarios_admin.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Administración de Comentarios{% endblock title %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Panel de Administración de Comentarios</h2>
+  
+    <div class="card mb-4">
+        <div class="card-header">
+            Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="id_search" class="form-label">Buscar por Texto</label>
+                        <input type="text" name="q" id="id_search" class="form-control" placeholder="Escribe tu búsqueda..." value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_usuario" class="form-label">Usuario</label>
+                        <select name="usuario" id="id_usuario" class="form-select">
+                            <option value="">Todos</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.pk }}" {% if usuario.pk|stringformat:"s" == usuario_id %}selected{% endif %}>
+                                    {{ usuario.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="id_estado" class="form-label">Estado</label>
+                        <select name="estado" id="id_estado" class="form-select">
+                            <option value="" {% if not estado_status %}selected{% endif %}>Todos</option>
+                            <option value="activo" {% if estado_status == 'activo' %}selected{% endif %}>Activos</option>
+                            <option value="baja" {% if estado_status == 'baja' %}selected{% endif %}>Dadas de Baja</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary" title="Buscar">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <a href="{% url 'recetas:lista_comentarios_admin' %}" class="btn btn-warning" title="Limpiar Filtros">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    {% if comentarios %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Comentario</th>
+                    <th>Autor</th>
+                    <th>Receta</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Fecha de Baja</th> 
+                    <th>Usuario de Baja</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comentario in comentarios %}
+                <tr>
+                    <td>{{ comentario.pk }}</td>
+                    <td>{{ comentario.texto|truncatechars:100 }}</td>
+                    <td>{{ comentario.usuario.username }}</td>
+                    <td><a href="{% url 'recetas:detalle' comentario.receta.pk %}">{{ comentario.receta.titulo }}</a></td>
+                    <td>{{ comentario.fecha|date:"d M Y H:i" }}</td>
+                    <td>
+                        {% if comentario.fecha_baja %}
+                        <span class="badge bg-danger">Inactiva</span>
+                        {% else %}
+                        <span class="badge bg-success">Activa</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ comentario.fecha_baja|date:"d M Y H:i" }}</td>
+                    <td>{{ comentario.usuario_baja.username }}</td>
+                     <td class="text-nowrap">
+                    {% if not comentario.fecha_baja %}
+                    {# Si el comentario está activo, mostramos el botón de eliminar #}
+                    <button type="button" 
+                        class="btn btn-danger btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#confirmDeleteModal" 
+                        data-comentario-id="{{ comentario.pk }}" 
+                        data-comentario-texto="{{ comentario.texto|truncatechars:30 }}" 
+                        title="Eliminar Comentario">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    {% endif %}
+                    {# Si el comentario está inactivo, no se muestra ningún botón #}
+                </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="alert alert-info text-center">No hay comentarios registrados.</p>
+    {% endif %}
+</div>
+
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteModalMessage">¿Estás seguro de que quieres eliminar este comentario?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancelar
+                </button>
+                <form id="deleteCommentForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmDeleteButton">
+                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+        confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var comentarioId = button.getAttribute('data-comentario-id');
+            var comentarioTexto = button.getAttribute('data-comentario-texto');
+
+            var modalMessage = confirmDeleteModal.querySelector('#deleteModalMessage');
+            var deleteCommentForm = confirmDeleteModal.querySelector('#deleteCommentForm');
+            var confirmDeleteButton = confirmDeleteModal.querySelector('#confirmDeleteButton');
+
+            modalMessage.textContent = `¿Estás seguro de que quieres eliminar el comentario "${comentarioTexto}" (ID: ${comentarioId})?`;
+            deleteCommentForm.action = `/Recetas/comentario/eliminar/${comentarioId}/`; // URL de tu vista de eliminación
+        });
+    });
+</script>
+{% endblock extra_js %}

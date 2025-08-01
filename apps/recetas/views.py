@@ -12,12 +12,13 @@ from django.utils import timezone
 from .forms import ComentarioForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-# Vista para crear una nueva receta
+from apps.usuarios.models import Usuario 
+
 class RecetaCreateView(LoginRequiredMixin, CreateView):
     model = Receta
     form_class = RecetaForm
     template_name = 'recetas/agregar_receta.html'
-    success_url = reverse_lazy('recetas:listar') # Redirigimos al listado general
+    success_url = reverse_lazy('recetas:listar') 
 
     def form_valid(self, form):
         form.instance.autor = self.request.user
@@ -306,3 +307,92 @@ class ComentarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
        
         return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': self.comentario.receta.pk}))
     
+
+
+class RecetasAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Receta
+    template_name = 'recetas/recetas_lista.html'
+    context_object_name = 'recetas'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-fecha')
+
+        search_query = self.request.GET.get('q')
+        categoria_id = self.request.GET.get('categoria')
+        usuario_id = self.request.GET.get('usuario')
+        baja_status = self.request.GET.get('baja')
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(titulo__icontains=search_query) | 
+                Q(cuerpo__icontains=search_query)
+            )
+
+        if categoria_id:
+            queryset = queryset.filter(categoria_receta_id=categoria_id)
+
+        if usuario_id:
+            queryset = queryset.filter(autor_id=usuario_id)
+
+        if baja_status == 'activo':
+            queryset = queryset.filter(fecha_baja__isnull=True)
+        elif baja_status == 'baja':
+            queryset = queryset.filter(fecha_baja__isnull=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        context['categoria_id'] = self.request.GET.get('categoria', '')
+        context['usuario_id'] = self.request.GET.get('usuario', '')
+        context['baja_status'] = self.request.GET.get('baja', '')
+
+        context['categorias'] = Categoria.objects.all()
+       
+        context['usuarios'] = Usuario.objects.all() 
+        return context
+    
+class ComentariosAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Comentario
+    template_name = 'recetas/lista_comentarios.html'
+    context_object_name = 'comentarios'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+    
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('-fecha')
+
+        search_query = self.request.GET.get('q')
+        usuario_id = self.request.GET.get('usuario')
+        estado_status = self.request.GET.get('estado')
+
+        if search_query:
+            
+            queryset = queryset.filter(Q(texto__icontains=search_query))
+
+        if usuario_id:
+           
+            queryset = queryset.filter(usuario_id=usuario_id)
+
+        if estado_status == 'activo':
+            queryset = queryset.filter(fecha_baja__isnull=True)
+        elif estado_status == 'baja':
+            queryset = queryset.filter(fecha_baja__isnull=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context['search_query'] = self.request.GET.get('q', '')
+        context['usuario_id'] = self.request.GET.get('usuario', '')
+        context['estado_status'] = self.request.GET.get('estado', '')
+
+        context['usuarios'] = Usuario.objects.all()
+        
+        return context
