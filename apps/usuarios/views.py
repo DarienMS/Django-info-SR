@@ -12,6 +12,7 @@ from .models import MensajeDirecto
 from .forms import MensajeForm, MensajeRespuestaForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone 
+from django.db.models import Q
 class Registro(CreateView):
 	
 	form_class = RegistroForm
@@ -19,16 +20,45 @@ class Registro(CreateView):
 	template_name = 'usuarios/registro.html'
 
 
-class UsuarioListView(UserPassesTestMixin, ListView):
-    model = Usuario 
+class UsuarioListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = Usuario
     template_name = 'usuarios/lista_usuarios.html'
     context_object_name = 'usuarios'
+    ordering = ['username']
 
     def test_func(self):
         return self.request.user.is_superuser
 
     def handle_no_permission(self):
         return redirect('home')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        search_query = self.request.GET.get('q')
+        status_filter = self.request.GET.get('status')
+
+        if search_query:
+            queryset = queryset.filter(
+                Q(username__icontains=search_query) |
+                Q(first_name__icontains=search_query) |
+                Q(last_name__icontains=search_query) |
+                Q(email__icontains=search_query)
+            )
+
+        if status_filter:
+            if status_filter == 'active':
+                queryset = queryset.filter(is_active=True)
+            elif status_filter == 'inactive':
+                queryset = queryset.filter(is_active=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_query'] = self.request.GET.get('q', '')
+        context['status_filter'] = self.request.GET.get('status', '')
+        return context
     
 class UsuarioDesactivarView(UserPassesTestMixin, UpdateView):
     model = Usuario
@@ -141,7 +171,7 @@ class MisMensajesListView(LoginRequiredMixin, ListView):
         return MensajeDirecto.objects.filter(remitente=self.request.user)
     
     
-class MensajeAdminListView(UserPassesTestMixin, ListView):
+class MensajeAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """
     Vista para que los administradores vean todos los mensajes enviados por los usuarios.
     """
@@ -150,18 +180,48 @@ class MensajeAdminListView(UserPassesTestMixin, ListView):
     context_object_name = 'mensajes_admin'
     
     def get_queryset(self):
-        # Retorna todos los mensajes, ordenados por estado (pendientes primero) y fecha
-        return MensajeDirecto.objects.all().order_by('estado', '-fecha_envio')
+  
+        queryset = super().get_queryset().order_by('estado', '-fecha_envio')
+
+      
+        
+        search_query = self.request.GET.get('q')
+        remitente_id = self.request.GET.get('remitente')
+        estado_status = self.request.GET.get('estado')
+
+        if search_query:
+            
+            queryset = queryset.filter(Q(mensaje__icontains=search_query) | Q(motivo__icontains=search_query))
+
+        if remitente_id:
+          
+            queryset = queryset.filter(remitente_id=remitente_id)
+
+        if estado_status:
+            
+            queryset = queryset.filter(estado=estado_status)
+
+        return queryset
     
-    # Esta función es la que comprueba si el usuario tiene permisos de staff
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+       
+        context['search_query'] = self.request.GET.get('q', '')
+        context['remitente_id'] = self.request.GET.get('remitente', '')
+        context['estado_status'] = self.request.GET.get('estado', '')
+
+       
+        context['usuarios'] = Usuario.objects.all()
+        
+        return context
+
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
     def handle_no_permission(self):
-        # Redirige a la página de inicio si el usuario no tiene permisos
         messages.error(self.request, 'No tienes permiso para ver esta página.')
         return redirect('home')
-    
     
 class MensajeResponderView(UserPassesTestMixin, View):
     """

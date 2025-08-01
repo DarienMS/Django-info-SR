@@ -7,6 +7,50 @@
 {% block contenido %}
 <div class="container mt-4">
     <h2 class="mb-4 text-center">Panel de Administración de Comentarios</h2>
+  
+    <div class="card mb-4">
+        <div class="card-header">
+            Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label for="id_search" class="form-label">Buscar por Texto</label>
+                        <input type="text" name="q" id="id_search" class="form-control" placeholder="Escribe tu búsqueda..." value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_usuario" class="form-label">Usuario</label>
+                        <select name="usuario" id="id_usuario" class="form-select">
+                            <option value="">Todos</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.pk }}" {% if usuario.pk|stringformat:"s" == usuario_id %}selected{% endif %}>
+                                    {{ usuario.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="id_estado" class="form-label">Estado</label>
+                        <select name="estado" id="id_estado" class="form-select">
+                            <option value="" {% if not estado_status %}selected{% endif %}>Todos</option>
+                            <option value="activo" {% if estado_status == 'activo' %}selected{% endif %}>Activos</option>
+                            <option value="baja" {% if estado_status == 'baja' %}selected{% endif %}>Dadas de Baja</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary" title="Buscar">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <a href="{% url 'recetas:lista_comentarios_admin' %}" class="btn btn-warning" title="Limpiar Filtros">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     
     {% if comentarios %}
     <div class="table-responsive">
@@ -42,12 +86,12 @@
                     <td>{{ comentario.fecha_baja|date:"d M Y H:i" }}</td>
                     <td>{{ comentario.usuario_baja.username }}</td>
                     <td class="text-nowrap">
-                        {# Botón para editar el comentario #}
+                       
                         <a href="{% url 'recetas:comentario_editar' comentario.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Comentario">
                             <i class="fas fa-edit"></i>
                         </a>
 
-                        {# Botón para eliminar el comentario (con modal de confirmación) #}
+                      
                         <button type="button" 
                             class="btn btn-danger btn-sm" 
                             data-bs-toggle="modal" 
@@ -68,7 +112,7 @@
     {% endif %}
 </div>
 
-{# --- Modal de Confirmación para Eliminar Comentario --- #}
+
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

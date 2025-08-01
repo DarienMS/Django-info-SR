@@ -7,6 +7,60 @@
 {% block contenido %}
 <div class="container mt-4">
     <h2 class="mb-4 text-center">Panel de Administración de Recetas</h2>
+ <div class="card mb-4">
+        <div class="card-header">
+            Filtros de Búsqueda
+        </div>
+        <div class="card-body">
+            <form method="get">
+                
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="id_search" class="form-label">Buscar por Título o Cuerpo</label>
+                        <input type="text" name="q" id="id_search" class="form-control" placeholder="Escribe tu búsqueda..." value="{{ search_query }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="id_categoria" class="form-label">Categoría</label>
+                        <select name="categoria" id="id_categoria" class="form-select">
+                            <option value="">Todas</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria.pk }}" {% if categoria.pk|stringformat:"s" == categoria_id %}selected{% endif %}>
+                                    {{ categoria.nombre }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="id_usuario" class="form-label">Usuario</label>
+                        <select name="usuario" id="id_usuario" class="form-select">
+                            <option value="">Todos</option>
+                            {% for usuario in usuarios %}
+                                <option value="{{ usuario.pk }}" {% if usuario.pk|stringformat:"s" == usuario_id %}selected{% endif %}>
+                                    {{ usuario.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="id_baja" class="form-label">Estado</label>
+                        <select name="baja" id="id_baja" class="form-select">
+                            <option value="" {% if not baja_status %}selected{% endif %}>Todas</option>
+                            <option value="activo" {% if baja_status == 'activo' %}selected{% endif %}>Activas</option>
+                            <option value="baja" {% if baja_status == 'baja' %}selected{% endif %}>Bajas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary" title="Buscar">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <a href="{% url 'recetas:recetas_lista' %}" class="btn btn-warning" title="Limpiar Filtros">
+                            <i class="fas fa-sync-alt"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <div class="mb-3 text-end">
         <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-primary">
@@ -44,24 +98,24 @@
                         {% endif %}
                     </td>
                       <td>{{ receta.categoria_receta.nombre }}</td>
-                    <td>{{ receta.fecha|date:"d M Y" }}</td> {# CORRECCIÓN: CAMBIADO A receta.fecha #}
+                    <td>{{ receta.fecha|date:"d M Y" }}</td> 
                     <td>{{ receta.fecha_baja |date:"d M Y" }}</td>
                     <td>{{ receta.usuario_baja.username }}</td>
                   
                 
                     <td class="text-nowrap">
-                        {# Botón para ver la receta #}
+                      
                         <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-success btn-sm me-1" title="Ver Receta">
                             <i class="fas fa-search"></i>
                         </a>
-                        {# Botón para editar la receta #}
+                       
                         <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Receta">
                             <i class="fas fa-edit"></i>
                         </a>
 
-                        {# Botones para Desactivar/Activar #}
+                        
                         {% if not receta.fecha_baja %}
-                        {# Botón Deshabilitar #}
+                       
                         <button type="button" 
                             class="btn btn-danger btn-sm" 
                             data-bs-toggle="modal" 
@@ -73,7 +127,7 @@
                             <i class="fas fa-ban"></i>
                         </button>
                         {% else %}
-                        {# Botón Habilitar #}
+                      
                         <button type="button" 
                             class="btn btn-success btn-sm" 
                             data-bs-toggle="modal" 
@@ -96,7 +150,7 @@
     {% endif %}
 </div>
 
-{# --- Modal de Confirmación para Desactivar/Activar Recetas --- #}
+
 <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

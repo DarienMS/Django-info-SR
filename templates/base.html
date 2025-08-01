@@ -16,89 +16,84 @@
   <body class="d-flex flex-column min-vh-100"> 
 
 
-    <nav class="navbar navbar-expand-lg fixed-top">
-      <div class="container-fluid">
-   
-        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
-          <img src="{% static 'img/logo.png' %}" alt="Logo" width="120" height="100" class="d-inline-block align-text-top me-2">
-        </a>
+ <nav class="navbar navbar-expand-lg fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+      <img src="{% static 'img/logo.png' %}" alt="Logo" width="120" height="100" class="d-inline-block align-text-top me-2">
+    </a>
 
-        {# Botón del "hamburguesa" - solo visible en pantallas pequeñas, target ahora es #navbarNav #}
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-
-     <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'home' %}">Home</a>
+          <a class="nav-link" href="{% url 'home' %}">Home</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'nosotros' %}">Nosotros</a>
+          <a class="nav-link" href="{% url 'nosotros' %}">Nosotros</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'recetas:listar' %}">Recetas</a>
+          <a class="nav-link" href="{% url 'recetas:listar' %}">Recetas</a>
         </li>
     
         {% if user.is_authenticated %}
-            {# Secciones para usuarios autenticados #}
+  
+          {% if not user.is_staff %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'usuarios:mis_mensajes' %}">
+                <i class="fas fa-inbox me-1"></i> Mensajes
+              </a>
+            </li>
+          {% endif %}
+          
+         
+          {% if user.is_staff %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPanel" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-cog me-1"></i> Panel Admin
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdownPanel">
+                <li><a class="dropdown-item" href="{% url 'usuarios:lista_mensajes_admin' %}">Panel de Mensajes</a></li>
+                
+                {% if user.is_superuser %}
+                  
+                  <li><a class="dropdown-item" href="{% url 'usuarios:lista_usuarios' %}">Panel Usuarios</a></li>
+                <li><a class="dropdown-item" href="{% url 'recetas:recetas_lista' %}">Panel Recetas</a></li>
+                  <li><a class="dropdown-item" href="{% url 'recetas:lista_comentarios_admin' %}">Panel de Comentarios</a></li>
+                  <li><a class="dropdown-item" href="{% url 'admin:index' %}" target="_blank">Panel Admin Django</a></li>
+                {% endif %}
+              </ul>
+            </li>
+          {% endif %}
 
-            {% if user.is_staff %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'usuarios:lista_mensajes_admin' %}">
-                    <i class="fas fa-inbox me-1"></i> Panel de Mensajes
-                </a>
-            </li>
-            {% else %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'usuarios:mis_mensajes' %}">
-                    <i class="fas fa-inbox me-1"></i> Mensajes
-                </a>
-            </li>
-            {% endif %}
-            
-            {% if user.is_superuser %}
-            <li class="nav-item">
-                <a href="{% url 'admin:index' %}" target="_blank" class="nav-link">Panel Admin Django</a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'usuarios:lista_usuarios' %}" target="_blank" class="nav-link">Panel USUARIOS</a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'recetas:recetas_lista' %}" target="_blank" class="nav-link">Panel RECETAS</a>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'recetas:lista_comentarios_admin' %}" class="nav-link">Panel COMENTARIOS</a>
-            </li>
-            {% endif %}
-
-            <li class="nav-item">
-                <span class="nav-link text-primary fw-bold">Bienvenido {{ user.username }}</span>
-            </li>
-            <li class="nav-item">
-                <form action="{% url 'logout' %}" method="post" class="d-flex align-items-center h-100">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link btn btn-link p-0">Cerrar Sesión</button>
-                </form>
-            </li>
+          <li class="nav-item">
+            <span class="nav-link text-primary fw-bold">Bienvenido {{ user.username }}</span>
+          </li>
+          <li class="nav-item">
+            <form action="{% url 'logout' %}" method="post" class="d-flex align-items-center h-100">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link p-0">Cerrar Sesión</button>
+            </form>
+          </li>
         {% else %}
-            {# Sección para usuarios no autenticados (Anónimos) #}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
-            </li>
-        {% endif %}
-    </ul>
-</div>
-      </div>
-    </nav>
 
-    {# Nuevo contenedor principal para el contenido que empujará el footer #}
-    <main class="flex-shrink-0"> {# ¡CAMBIO CLAVE AQUÍ! Envuelve tu contenido en <main class="flex-shrink-0"> #}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Login</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+   
+    <main class="flex-shrink-0"> 
 
         {# BLOQUE DE MENSAJES #}
-        <div class="container mt-3" style="margin-top: 100px !important;"> {# Ajusta el margen si la navbar lo cubre #}
+        <div class="container mt-3" style="margin-top: 100px !important;"> 
             {% if messages %}
                 <div class="messages-container"> 
                     {% for message in messages %}
@@ -111,15 +106,15 @@
             {% endif %}
         </div>
 
-        <div class="bloque"> {# Este div es el que usas para envolver el contenido #}
+        <div class="bloque"> 
             {% block contenido %}
             {% endblock contenido %}
         </div>
 
-    </main> {# CIERRA LA ETIQUETA main #}
+    </main> 
 
-    {# Incluye el footer al final del body, antes de los scripts de JS. La ruta es 'templates/footer.html' #}
-    {% include 'footer.html' %} {# OJO: Si lo pones en 'templates/footer.html', la ruta es solo 'footer.html' #}
+   
+    {% include 'footer.html' %} 
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
