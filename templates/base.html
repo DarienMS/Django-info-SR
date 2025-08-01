@@ -30,56 +30,67 @@
         </button>
 
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> 
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'home' %}">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'nosotros' %}">Nosotros</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'recetas:listar' %}">Recetas</a>
-            </li>
+     <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'home' %}">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'nosotros' %}">Nosotros</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'recetas:listar' %}">Recetas</a>
+        </li>
+    
+        {% if user.is_authenticated %}
+            {# Secciones para usuarios autenticados #}
 
-            {% if user.is_authenticated %}
-              {% comment %} <li class="nav-item">
-                <a class="nav-link" href="{% url 'recetas:mis_recetas' %}">Mis Recetas</a>
-              </li> {% endcomment %}
-              {% if user.is_superuser %}
-              <li class="nav-item">
-                <a href="{% url 'admin:index' %}" target="_blank" class="nav-link">Panel Admin Django</a>
-              </li>
-               <li class="nav-item">
-             <a href="{% url 'usuarios:lista_usuarios' %}" target="_blank" class="nav-link">Panel USUARIOS</a>
-              </li>
-               <li class="nav-item">
-             <a href="{% url 'recetas:recetas_lista' %}" target="_blank" class="nav-link">Panel RECETAS</a>
-              </li>
-              <li class="nav-item">
-                 <a href="{% url 'recetas:lista_comentarios_admin' %}" class="nav-link">Panel COMENTARIOS</a>
-              </li>
-              {% endif %}
-              <li class="nav-item">
-                <span class="nav-link text-primary fw-bold">Bienvenido {{ user.username }}</span>
-              </li>
-              {# CAMBIOS PARA CERRAR SESIÓN: #}
-              {# 1. Se añaden 'd-flex align-items-center h-100' al formulario para alineación #}
-              {# 2. Se elimina 'text-danger' del botón para que no esté rojo #}
-              {# 3. Se elimina 'style="padding: 0; color: inherit;"' del botón, se usa 'p-0' #}
-              <li class="nav-item">
-                <form action="{% url 'logout' %}" method="post" class="d-flex align-items-center h-100">
-                  {% csrf_token %}
-                  <button type="submit" class="nav-link btn btn-link p-0">Cerrar Sesión</button>
-                </form>
-              </li>
+            {% if user.is_staff %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'usuarios:lista_mensajes_admin' %}">
+                    <i class="fas fa-inbox me-1"></i> Panel de Mensajes
+                </a>
+            </li>
             {% else %}
-               <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
-              </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'usuarios:mis_mensajes' %}">
+                    <i class="fas fa-inbox me-1"></i> Mensajes
+                </a>
+            </li>
             {% endif %}
-          </ul>
-        </div>
+            
+            {% if user.is_superuser %}
+            <li class="nav-item">
+                <a href="{% url 'admin:index' %}" target="_blank" class="nav-link">Panel Admin Django</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'usuarios:lista_usuarios' %}" target="_blank" class="nav-link">Panel USUARIOS</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'recetas:recetas_lista' %}" target="_blank" class="nav-link">Panel RECETAS</a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'recetas:lista_comentarios_admin' %}" class="nav-link">Panel COMENTARIOS</a>
+            </li>
+            {% endif %}
+
+            <li class="nav-item">
+                <span class="nav-link text-primary fw-bold">Bienvenido {{ user.username }}</span>
+            </li>
+            <li class="nav-item">
+                <form action="{% url 'logout' %}" method="post" class="d-flex align-items-center h-100">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link btn btn-link p-0">Cerrar Sesión</button>
+                </form>
+            </li>
+        {% else %}
+            {# Sección para usuarios no autenticados (Anónimos) #}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>
       </div>
     </nav>
 

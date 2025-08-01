@@ -2,7 +2,7 @@
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import Usuario 
+from .models import MensajeDirecto, Usuario
 
 class   RegistroForm(UserCreationForm):
     class Meta(UserCreationForm.Meta): # heredar la Meta de UserCreationForm(esto ya es propio de django)
@@ -31,3 +31,21 @@ class   RegistroForm(UserCreationForm):
 
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
+            
+class MensajeForm(forms.ModelForm):
+    class Meta:
+        model = MensajeDirecto
+        fields = ['motivo', 'mensaje']
+        widgets = {
+            'motivo': forms.TextInput(attrs={'class': 'form-control'}),
+            'mensaje': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }
+
+# Formulario para que el admin pueda responder un mensaje
+class MensajeRespuestaForm(forms.ModelForm):
+    class Meta:
+        model = MensajeDirecto
+        fields = ['respuesta']
+        widgets = {
+            'respuesta': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+        }

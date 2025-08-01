@@ -1,0 +1,85 @@
+{# apps/usuarios/templates/usuarios/mis_mensajes.html #}
+{% extends 'base.html' %}
+
+{% block title %}Mis Mensajes{% endblock title %}
+
+{% block contenido %}
+
+<div class="modal fade" id="modalNuevoMensaje" tabindex="-1" aria-labelledby="modalLabelNuevoMensaje" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabelNuevoMensaje">Enviar Nuevo Mensaje</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'usuarios:enviar_mensaje' %}" id="formNuevoMensaje">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_motivo" class="form-label">Motivo</label>
+                        <input type="text" name="motivo" id="id_motivo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_mensaje" class="form-label">Tu Mensaje</label>
+                        <textarea name="mensaje" id="id_mensaje" class="form-control" rows="5" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" form="formNuevoMensaje" class="btn btn-success">Enviar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Mis Mensajes</h2>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <p class="text-muted">Aquí puedes ver el estado de los mensajes que has enviado.</p>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalNuevoMensaje">
+             <i class="fas fa-plus-circle me-1"></i> Nuevo Mensaje
+        </button>
+    </div>
+
+    {% if mensajes %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Estado</th>
+                    <th>Motivo</th>
+                    <th>Mensaje</th>
+                    <th>Fecha de Envío</th>
+                    <th>Respuesta del Admin</th>
+                    <th>Fecha de Respuesta</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mensaje in mensajes %}
+                <tr>
+                    <td>{{ mensaje.id }}</td>
+                    <td>
+                        {% if mensaje.estado == 'respondido' %}
+                            <span class="badge bg-success">Respondido</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ mensaje.motivo }}</td>
+                    <td>{{ mensaje.mensaje|truncatechars:50 }}</td>
+                    <td>{{ mensaje.fecha_envio|date:"d M Y H:i" }}</td>
+                    <td>{{ mensaje.respuesta|default:"Sin respuesta aún..." }}</td>
+                    <td>{{ mensaje.fecha_respuesta|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="alert alert-info">Aún no has enviado ningún mensaje al equipo de soporte.</p>
+    {% endif %}
+</div>
+{% endblock contenido %}
