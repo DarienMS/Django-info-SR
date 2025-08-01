@@ -105,13 +105,11 @@
                 
                     <td class="text-nowrap">
                       
-                        <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-success btn-sm me-1" title="Ver Receta">
+                        <a href="{% url 'recetas:detalle' receta.pk %}" class="btn btn-primary btn-sm me-1" title="Ver Receta">
                             <i class="fas fa-search"></i>
                         </a>
                        
-                        <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Receta">
-                            <i class="fas fa-edit"></i>
-                        </a>
+                       
 
                         
                         {% if not receta.fecha_baja %}

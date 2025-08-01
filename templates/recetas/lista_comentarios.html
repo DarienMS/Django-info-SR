@@ -85,23 +85,21 @@
                     </td>
                     <td>{{ comentario.fecha_baja|date:"d M Y H:i" }}</td>
                     <td>{{ comentario.usuario_baja.username }}</td>
-                    <td class="text-nowrap">
-                       
-                        <a href="{% url 'recetas:comentario_editar' comentario.pk %}" class="btn btn-warning btn-sm me-1" title="Editar Comentario">
-                            <i class="fas fa-edit"></i>
-                        </a>
-
-                      
-                        <button type="button" 
-                            class="btn btn-danger btn-sm" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#confirmDeleteModal" 
-                            data-comentario-id="{{ comentario.pk }}" 
-                            data-comentario-texto="{{ comentario.texto|truncatechars:30 }}" 
-                            title="Eliminar Comentario">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
+                     <td class="text-nowrap">
+                    {% if not comentario.fecha_baja %}
+                    {# Si el comentario está activo, mostramos el botón de eliminar #}
+                    <button type="button" 
+                        class="btn btn-danger btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#confirmDeleteModal" 
+                        data-comentario-id="{{ comentario.pk }}" 
+                        data-comentario-texto="{{ comentario.texto|truncatechars:30 }}" 
+                        title="Eliminar Comentario">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    {% endif %}
+                    {# Si el comentario está inactivo, no se muestra ningún botón #}
+                </td>
                 </tr>
                 {% endfor %}
             </tbody>
