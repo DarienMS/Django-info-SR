@@ -1,71 +1,55 @@
-{# apps/usuarios/templates/usuarios/usuario_crear.html #}
-{% extends 'base.html' %}
+<form method="post" action="{% url 'usuarios:crear_usuario' %}">
+    {% csrf_token %}
 
-{% block title %}Crear Nuevo Usuario{% endblock title %}
-
-{% block contenido %}
-<div class="container mt-4">
-    <div class="card p-4 shadow-sm">
-        <h2 class="card-title text-center mb-4">Crear Nuevo Usuario</h2>
-
-        <form method="post">
-            {% csrf_token %} {# ¡Importante para la seguridad de Django! #}
-
-            {# Bucle para renderizar todos los campos del formulario #}
-            {% for field in form %}
-                <div class="mb-3">
-                    {{ field.label_tag }} {# Etiqueta del campo #}
-                    {{ field }} {# El campo de entrada #}
-                    {% if field.help_text %}
-                        <div class="form-text text-muted">{{ field.help_text }}</div>
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <div class="alert alert-danger mt-1">{{ error }}</div>
-                    {% endfor %}
-                </div>
+    {% for field in form %}
+    <div class="mb-3">
+        {% if field.field.widget.input_type == 'checkbox' %}
+        <div class="form-check">
+            {{ field }}
+            <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% for error in field.errors %}
+            <div class="alert alert-danger mt-1">{{ error }}</div>
             {% endfor %}
-
-            {# Mensajes de errores no relacionados con campos específicos #}
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger mt-3">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-secondary me-2">Cancelar</a>
-                <button type="submit" class="btn btn-primary">Crear Usuario</button>
-            </div>
-        </form>
+        </div>
+        {% else %}
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <div class="form-text text-muted">{{ field.help_text }}</div>
+        {% endif %}
+        {% for error in field.errors %}
+        <div class="alert alert-danger mt-1">{{ error }}</div>
+        {% endfor %}
+        {% endif %}
     </div>
-</div>
-{% endblock contenido %}
+    {% endfor %}
 
-{% block extra_js %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger mt-3">
+        {% for error in form.non_field_errors %}
+        <p>{{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+        <button type="button" class="btn btn-warning me-2" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Aceptar</button>
+    </div>
+</form>
+
 <script>
-    // Script para añadir clases de Bootstrap a los campos del formulario
+  
     document.addEventListener('DOMContentLoaded', function() {
-        var formFields = document.querySelectorAll('input, select, textarea');
+        var formFields = document.querySelectorAll('#crearUserFormContent input, #crearUserFormContent select, #crearUserFormContent textarea');
         formFields.forEach(function(field) {
-            if (field.type !== 'hidden' && field.type !== 'submit') {
+            if (field.type !== 'hidden' && field.type !== 'submit' && field.type !== 'checkbox') {
                 field.classList.add('form-control');
             }
             if (field.type === 'checkbox') {
                 field.classList.remove('form-control');
                 field.classList.add('form-check-input');
-                var div = field.closest('.mb-3');
-                if (div) {
-                    div.classList.add('form-check');
-                    var label = div.querySelector('label');
-                    if (label) {
-                        label.classList.add('form-check-label');
-                        field.parentNode.insertBefore(label, field);
-                    }
-                }
             }
         });
     });
 </script>
-{% endblock extra_js %}
