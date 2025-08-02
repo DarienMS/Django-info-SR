@@ -13,7 +13,7 @@ from .forms import ComentarioForm
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from apps.usuarios.models import Usuario 
-
+from datetime import datetime
 class RecetaCreateView(LoginRequiredMixin, CreateView):
     model = Receta
     form_class = RecetaForm
@@ -32,40 +32,56 @@ class RecetaListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        
         queryset = Receta.objects.filter(fecha_baja__isnull=True)
-
-       
+        
+        # Filtro por categoría
         categoria_id = self.request.GET.get('id')
         if categoria_id:
             try:
-            
                 queryset = queryset.filter(categoria_receta__pk=categoria_id)
             except ValueError:
-               
                 pass
             except Categoria.DoesNotExist:
-                
                 pass
 
-      
+        # Nuevo filtro: Rango de fechas
+        fecha_inicio_str = self.request.GET.get('fecha_inicio')
+        fecha_fin_str = self.request.GET.get('fecha_fin')
+
+        if fecha_inicio_str and fecha_fin_str:
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            queryset = queryset.filter(fecha__range=[fecha_inicio, fecha_fin])
+        elif fecha_inicio_str:
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+            queryset = queryset.filter(fecha__gte=fecha_inicio)
+        elif fecha_fin_str:
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            queryset = queryset.filter(fecha__lte=fecha_fin)
+        
         return queryset
 
     def get_context_data(self, **kwargs):
-
         context = super().get_context_data(**kwargs)
-       
+        
         context['categorias'] = Categoria.objects.all().order_by('nombre')
-
-       
+        
+        # Obtener los valores de los filtros para mantenerlos en el formulario
         categoria_id = self.request.GET.get('id')
+        fecha_inicio_str = self.request.GET.get('fecha_inicio', '')
+        fecha_fin_str = self.request.GET.get('fecha_fin', '')
+        
         if categoria_id:
             try:
                 categoria = Categoria.objects.get(pk=categoria_id)
                 context['categoria_actual'] = categoria 
             except Categoria.DoesNotExist:
                 pass 
-
+        
+        # Añadir los valores de los nuevos filtros al contexto
+        context['fecha_inicio_actual'] = fecha_inicio_str
+        context['fecha_fin_actual'] = fecha_fin_str
+        
         return context
 
 class MisRecetasListView(LoginRequiredMixin, ListView):
@@ -74,25 +90,73 @@ class MisRecetasListView(LoginRequiredMixin, ListView):
     context_object_name = 'mis_recetas'
     ordering = ['-fecha']
     paginate_by = 10
+    
     def dispatch(self, request, *args, **kwargs):
-        
-        response = super().dispatch(request, *args, **kwargs)
-        
-       
+        # CORRECTO: Ahora cuenta TODAS las recetas del usuario, sin importar si tienen fecha_baja.
         user_recipes_count = Receta.objects.filter(autor=request.user).count()
-
+        
+        # Si el usuario no tiene ninguna receta (ni activa ni de baja), lo redirige.
         if user_recipes_count == 0:
-          
             messages.info(request, "Aún no tienes recetas publicadas. ¡Crea tu primera receta para verla aquí!")
-         
             return redirect(reverse_lazy('recetas:listar'))
         
-        
-        return response 
-    
+        # Si el usuario tiene al menos una receta, permite el acceso a la vista.
+        return super().dispatch(request, *args, **kwargs) 
     def get_queryset(self):
-        return Receta.objects.filter(autor=self.request.user).order_by('-fecha')
+        # El queryset inicial se filtra por el autor.
+        queryset = Receta.objects.filter(autor=self.request.user)
 
+        # Filtro por estado (activas/baja)
+        estado = self.request.GET.get('estado')
+        if estado == 'baja':
+            queryset = queryset.filter(fecha_baja__isnull=False)
+        elif estado == 'activas':
+            queryset = queryset.filter(fecha_baja__isnull=True)
+        # Si el 'estado' no está o está vacío, no se aplica este filtro,
+        # por lo que el queryset inicial (todas las recetas del usuario) se mantiene.
+
+        # Filtro por categoría
+        categoria_id = self.request.GET.get('id')
+        if categoria_id:
+            try:
+                queryset = queryset.filter(categoria_receta__pk=categoria_id)
+            except (ValueError, Categoria.DoesNotExist):
+                pass
+
+        # Filtro por rango de fechas
+        fecha_inicio_str = self.request.GET.get('fecha_inicio')
+        fecha_fin_str = self.request.GET.get('fecha_fin')
+        if fecha_inicio_str and fecha_fin_str:
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            queryset = queryset.filter(fecha__range=[fecha_inicio, fecha_fin])
+        elif fecha_inicio_str:
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').date()
+            queryset = queryset.filter(fecha__gte=fecha_inicio)
+        elif fecha_fin_str:
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').date()
+            queryset = queryset.filter(fecha__lte=fecha_fin)
+            
+        # Filtro de búsqueda por título o cuerpo
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(Q(titulo__icontains=query) | Q(cuerpo__icontains=query))
+
+        return queryset.order_by('-fecha')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        context['categorias'] = Categoria.objects.all().order_by('nombre')
+        
+        # Se guarda el valor del filtro para que la plantilla lo muestre como seleccionado
+        context['estado_actual'] = self.request.GET.get('estado', '') 
+        context['categoria_actual'] = self.request.GET.get('id', '')
+        context['fecha_inicio_actual'] = self.request.GET.get('fecha_inicio', '')
+        context['fecha_fin_actual'] = self.request.GET.get('fecha_fin', '')
+        context['busqueda_actual'] = self.request.GET.get('q', '')
+        
+        return context
 # Vista de detalle de una receta
 class RecetaDetailView(DetailView):
     model = Receta

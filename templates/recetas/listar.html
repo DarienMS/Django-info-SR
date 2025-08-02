@@ -5,86 +5,114 @@
 
 {% block contenido %}
     <div class="container mt-4">
-        <div class="card shadow p-4" style="background-color: #fce4c2;">
-            <h3 class="mb-4 text-center">Gestion de Recetas</h3>
-            <div class="d-inline-flex justify-content-center align-items-center gap-3 w-100">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success" style="min-width: 200px;">
-                        Agregar Receta
-                    </a>
-                    <a href="{% url 'recetas:mis_recetas' %}" class="btn btn-primary" style="min-width: 200px;">
-                        Mis Recetas
-                    </a>
-                {% else %}
-                    <p class="text-center">Inicia sesión para agregar nuevas recetas.</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="container mt-4">
-        <div class="card shadow p-4" style="background-color: #E9D3B3;">
-            <h2 class="mb-4 text-center">Lista</h2>
-            
-            {# FORMULARIO DE FILTROS Y BÚSQUEDA #}
-            {# Añadimos d-flex y flex-wrap a la fila para control de flexbox #}
-            <form method="GET" action="{% url 'recetas:listar' %}" class="mb-4 row g-3 d-flex flex-wrap align-items-center">
-                {# COLUMNA PARA FILTRAR POR CATEGORÍA #}
-                <div class="col-md-6 d-flex align-items-center"> {# Añadimos d-flex y align-items-center a la columna #}
-                    <label for="id_categoria" class="form-label mb-0 me-2">Categoría:</label> {# Eliminamos margen inferior de label y añadimos margin-right #}
-                    <select name="id" id="id_categoria" class="form-select flex-grow-inherit" onchange="this.form.submit()"> {# select toma el espacio restante #}
-                        <option value="">TODAS</option>
-                        {% for cat in categorias %}
-                            <option value="{{ cat.pk }}" {% if categoria_actual and categoria_actual.pk == cat.pk %}selected{% endif %}>
-                                {{ cat.nombre }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                {# COLUMNA PARA BUSCAR #}
-                <div class="col-md-6 d-flex align-items-center"> {# Añadimos d-flex y align-items-center a la columna #}
-                    <label for="id_busqueda" class="form-label mb-0 me-2">Buscar:</label> {# Eliminamos margen inferior de label y añadimos margin-right #}
-                    <div class="input-group"> {# input-group estándar, toma el espacio restante #}
-                        <input type="text" name="q" id="id_busqueda" placeholder="Buscar por título o cuerpo..." value="{{ busqueda_actual }}" class="form-control">
-                        
-                        {# Botón de búsqueda (TEXTO) pegado al input #}
-                        {# input-group-append se encarga de que se peguen #}
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-primary m-2">Buscar</button>
-                        </div>
-                        
-                        {# Botón "Limpiar" (si está activo) - con un margen para separarlo #}
-                        {% if categoria_actual or tipo_actual or busqueda_actual %}
-                            <a href="{% url 'recetas:listar' %}" class="btn btn-secondary ms-2">Limpiar</a>
+        <div class="row">
+            {# Panel lateral izquierdo: Botones de acción y Filtros #}
+            <div class="col-md-3 mb-4">
+                {# Card de los botones de acción #}
+                <div class="card shadow p-4 mb-4" style="background-color: #fce4c2;">
+                    <h5 class="mb-4 text-center">Gestión de Recetas</h5>
+                    <div class="d-grid gap-2">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-success">
+                                Agregar Receta
+                            </a>
+                            <a href="{% url 'recetas:mis_recetas' %}" class="btn btn-primary">
+                                Mis Recetas
+                            </a>
+                        {% else %}
+                            <p class="text-center">Inicia sesión para agregar nuevas recetas.</p>
                         {% endif %}
                     </div>
                 </div>
-            </form>
-            
-            {# DIV DE LISTADO DE RECETAS #}
-            <div class="row">
-                {% for receta in recetas %}
-                    <div class="col-md-4 mb-4">
-                        <a href="{% url 'recetas:detalle' receta.pk %}" class="text-decoration-none">
-                            <div class="card h-100 shadow-sm">
-                                {% if receta.imagen %}
-                                    <img src="{{ receta.imagen.url }}" class="card-img-top" alt="Imagen de {{ receta.titulo }}">
-                                {% else %}
-                                    <img src="{% static 'img/placeholder.png' %}" class="card-img-top" alt="Sin imagen">
-                                {% endif %}
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ receta.titulo }}</h5>
-                                    <p class="card-text mb-1"><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
-                                    <p class="card-text"><small class="text-muted">{{ receta.fecha|date:"d/m/Y" }}</small></p>
-                                </div>
+
+                {# Card de los filtros y búsqueda #}
+                <div class="card shadow p-4" style="background-color: #f0e6d6;">
+                    <h5 class="mb-3 text-center">Filtros y Búsqueda</h5>
+                    <form method="GET" action="{% url 'recetas:listar' %}">
+                        {# NUEVO FILTRO: Estado #}
+                        <div class="mb-3">
+                            <label for="id_estado" class="form-label">Estado:</label>
+                            <select name="estado" id="id_estado" class="form-select">
+                                <option value="" {% if not estado_actual %}selected{% endif %}>Todas</option>
+                                <option value="activas" {% if estado_actual == 'activas' %}selected{% endif %}>Activas</option>
+                                <option value="baja" {% if estado_actual == 'baja' %}selected{% endif %}>Dadas de Baja</option>
+                            </select>
+                        </div>
+                        
+                        {# Filtro: Categoría #}
+                        <div class="mb-3">
+                            <label for="id_categoria" class="form-label">Categoría:</label>
+                            <select name="id" id="id_categoria" class="form-select">
+                                <option value="">TODAS</option>
+                                {% for cat in categorias %}
+                                    <option value="{{ cat.pk }}" {% if categoria_actual and categoria_actual.pk == cat.pk %}selected{% endif %}>
+                                        {{ cat.nombre }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        {# Filtro: Rango de Fecha #}
+                        <div class="mb-3">
+                            <label class="form-label">Rango de Fecha:</label>
+                            <div class="input-group">
+                                <input type="date" name="fecha_inicio" value="{{ fecha_inicio_actual }}" class="form-control" placeholder="Desde">
+                                <input type="date" name="fecha_fin" value="{{ fecha_fin_actual }}" class="form-control" placeholder="Hasta">
                             </div>
-                        </a>
+                        </div>
+
+                        {# Filtro: Búsqueda #}
+                        <div class="mb-3">
+                            <label for="id_busqueda" class="form-label">Buscar:</label>
+                            <div class="input-group">
+                                <input type="text" name="q" id="id_busqueda" placeholder="Buscar por título..." value="{{ busqueda_actual }}" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-magnifying-glass"></i>
+                            </button>
+                            {% if categoria_actual or fecha_inicio_actual or fecha_fin_actual or busqueda_actual or estado_actual %}
+                                <a href="{% url 'recetas:listar' %}" class="btn btn-warning">
+                                    <i class="fa-solid fa-broom"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {# Columna de la derecha para la lista de recetas #}
+            <div class="col-md-9">
+                <div class="card shadow p-4" style="background-color: #E9D3B3;">
+                    <h2 class="mb-4 text-center">Lista de Recetas</h2>
+                    
+                    <div class="row">
+                        {% for receta in recetas %}
+                            <div class="col-md-4 mb-4">
+                                <a href="{% url 'recetas:detalle' receta.pk %}" class="text-decoration-none">
+                                    <div class="card h-100 shadow-sm">
+                                        {% if receta.imagen %}
+                                            <img src="{{ receta.imagen.url }}" class="card-img-top" alt="Imagen de {{ receta.titulo }}">
+                                        {% else %}
+                                            <img src="{% static 'img/placeholder.png' %}" class="card-img-top" alt="Sin imagen">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ receta.titulo }}</h5>
+                                            <p class="card-text mb-1"><strong>Categoría:</strong> {{ receta.categoria_receta }}</p>
+                                            <p class="card-text"><small class="text-muted">{{ receta.fecha|date:"d/m/Y" }}</small></p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% empty %}
+                            <div class="col-12">
+                                <p class="text-center">No se encontraron recetas que coincidan con los criterios de búsqueda.</p>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% empty %}
-                    <div class="col-12">
-                        <p class="text-center">No se encontraron recetas que coincidan con los criterios de búsqueda.</p>
-                    </div>
-                {% endfor %}
+                </div>
             </div>
         </div>
     </div>
