@@ -1,9 +1,36 @@
-body {
-    background-color: #fff8e1; /* crema claro */
+/* body {
+    background-color: #fff8e1; /* crema claro
 }
 body nav {
-	background-color: #E9D3B3; /* gris claro */
+	background-color: #e2ceaf; /* gris claro 
+} */ 
+
+/* Lo que estoy aplicando GERA */
+body {
+  background-color: #f3e5ab; /* tono vainilla claro */
+  font-family: 'Georgia', serif;
+  color: #69523a; /* marrón chocolate medio */
 }
+
+nav {
+  background-color: #a8df61; /* marrón topo suave */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06); /* sombra ligera y elegante */
+}
+
+nav a {
+  color: #a8f599; /* marrón oscuro tipo espresso */
+  text-decoration: none;
+  padding: 10px 20px;
+  display: inline-block;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+nav a:hover {
+  background-color: #ddf5c9; /* marrón más intenso tipo moka */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* sombra rica y envolvente */
+}
+
 
 .centrar{
 	text-align: center;
