@@ -9,10 +9,16 @@ from .forms import Usuario
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .models import MensajeDirecto
-from .forms import MensajeForm, MensajeRespuestaForm
+from .forms import MensajeForm, MensajeRespuestaForm,PerfilCompletoForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone 
 from django.db.models import Q
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from .forms import UserUpdateForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+
 class Registro(CreateView):
 	
 	form_class = RegistroForm
@@ -128,7 +134,16 @@ class UsuarioCreateView(UserPassesTestMixin, CreateView):
     form_class = RegistroForm 
     template_name = 'usuarios/usuario_crear.html'
     success_url = reverse_lazy('usuarios:lista_usuarios')
-
+    
+    def get(self, request, *args, **kwargs):
+        # Si es una solicitud AJAX, solo renderiza el formulario
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            form = self.get_form()
+            context = {'form': form}
+            return HttpResponse(render_to_string(self.template_name, context, request))
+        
+        # De lo contrario, usa el comportamiento por defecto (renderiza la página completa)
+        return super().get(request, *args, **kwargs)
     def test_func(self):
         return self.request.user.is_superuser
 
@@ -252,5 +267,33 @@ class MensajeResponderView(UserPassesTestMixin, View):
         except MensajeDirecto.DoesNotExist:
             messages.error(request, "El mensaje no existe.")
         
-        # Redirige siempre de vuelta a la lista de mensajes
+     
         return redirect('usuarios:lista_mensajes_admin')
+    
+# hay que arreglar este, tiene un comportamiento extraño no lo entiendo muy bien aun
+def perfil_usuario_view(request):
+    form = PerfilCompletoForm(instance=request.user)
+
+    if request.method == 'POST':
+        form = PerfilCompletoForm(request.POST, instance=request.user)
+        if form.is_valid():
+            user = form.save(commit=False)
+            
+            if form.cleaned_data['new_password1']:
+                user.set_password(form.cleaned_data['new_password1'])
+                user.save()
+                update_session_auth_hash(request, user)
+                messages.success(request, "Tu perfil y contraseña se han actualizado correctamente. ✅")
+            else:
+                user.save()
+                messages.success(request, "Tu perfil se ha actualizado correctamente. ✅")
+            
+            return render(request, 'usuarios/perfil_usuario.html', {'form': form})
+        else:
+           
+            return render(request, 'usuarios/perfil_usuario.html', {'form': form})
+
+    context = {
+        'form': form
+    }
+    return render(request, 'usuarios/perfil_usuario.html', context)

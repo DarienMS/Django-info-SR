@@ -239,25 +239,31 @@ class RecetaReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
     success_url = reverse_lazy('recetas:mis_recetas')
 
     def get_object(self):
-       
         return get_object_or_404(self.model, pk=self.kwargs['pk'])
 
     def test_func(self):
-      
         receta = self.get_object()
-        return receta.autor == self.request.user
+        # Modifica esta línea para permitir al autor o a un superusuario
+        return receta.autor == self.request.user or self.request.user.is_superuser
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        self.object.fecha_baja = None    
-        self.object.usuario_baja = None 
-        self.object.save()               
+        self.object.fecha_baja = None
+        self.object.usuario_baja = None
+        self.object.save()
 
         messages.success(self.request, f"La receta '{self.object.titulo}' ha sido habilitada nuevamente.")
+        
+        # Redirigir al panel de administración si el usuario es un superusuario
+        if request.user.is_superuser:
+            # Asegúrate de usar el nombre correcto de tu URL de panel
+            return redirect(reverse_lazy('recetas:recetas_lista')) 
+        
+        # Si no es superusuario, redirige a 'mis_recetas'
         return redirect(self.success_url)
 
-    
     def get(self, request, *args, **kwargs):
+        # Esta redirección está bien si el usuario no tiene acceso a la vista por GET.
         return redirect(self.success_url)
     
 class ComentarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -281,33 +287,35 @@ class ComentarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 class ComentarioDeleteView(LoginRequiredMixin, UserPassesTestMixin, View): 
     def dispatch(self, request, *args, **kwargs):
-
         self.comentario = get_object_or_404(Comentario, pk=self.kwargs['pk'])
         return super().dispatch(request, *args, **kwargs)
 
     def test_func(self):
-     
         return self.request.user == self.comentario.usuario or self.request.user.is_superuser
 
     def post(self, request, *args, **kwargs):
-       
         comentario = self.comentario
-
         
         comentario.fecha_baja = timezone.now() 
         comentario.usuario_baja = request.user 
         comentario.save() 
 
-        messages.success(request, "Comentario eliminado lógicamente.")
-       
-        return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': comentario.receta.pk}))
+        messages.success(request, "Comentario eliminado.")
+        
+        # Redirección corregida para superusuarios
+        if request.user.is_superuser:
+            return redirect(reverse_lazy('recetas:lista_comentarios_admin')) 
+        else:
+            return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': comentario.receta.pk}))
 
     def handle_no_permission(self):
         messages.error(self.request, "No tienes permiso para eliminar este comentario.")
-       
-        return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': self.comentario.receta.pk}))
-    
-
+        
+        # Redirección corregida para superusuarios
+        if self.request.user.is_superuser:
+            return redirect(reverse_lazy('recetas:panel-lista_comentarios_admin'))
+        else:
+            return redirect(reverse_lazy('recetas:detalle', kwargs={'pk': self.comentario.receta.pk}))
 
 class RecetasAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Receta
