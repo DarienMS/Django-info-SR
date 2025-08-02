@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil{% endblock %}
+{% block contenido %}
+<div class="container mt-4">
+    <h2 class="mb-4">Mi Perfil de Usuario</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5>Información de Perfil</h5>
+            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                <i class="fas fa-edit me-1"></i> Editar
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Usuario:</strong> {{ user.username }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Nombre:</strong> {{ user.first_name|default:"No especificado" }}</p>
+                    <p><strong>Apellido:</strong> {{ user.last_name|default:"No especificado" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Se unió el:</strong> {{ user.date_joined|date:"d M, Y" }}</p>
+                    <p><strong>Último inicio de sesión:</strong> {{ user.last_login|date:"d M, Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white">
+                <h5 class="modal-title" id="editProfileModalLabel">Editar Perfil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'usuarios:perfil' %}">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <strong>¡Error al guardar!</strong> Por favor, corrige los siguientes campos.
+                            <ul class="errorlist">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    
+                    <h4 class="mb-3">Datos Personales</h4>
+                    <div class="mb-3">
+                        {{ form.first_name.label_tag }}
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="alert alert-danger mt-1">{{ form.first_name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.last_name.label_tag }}
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="alert alert-danger mt-1">{{ form.last_name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.email.label_tag }}
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="alert alert-danger mt-1">{{ form.email.errors }}</div>{% endif %}
+                    </div>
+                    <hr>
+                    
+                    <p class="text-muted">Deja los campos en blanco si no quieres cambiar tu contraseña.</p>
+                    <div class="mb-3">
+                        {{ form.old_password.label_tag }}
+                        {{ form.old_password }}
+                        {% if form.old_password.errors %}<div class="alert alert-danger mt-1">{{ form.old_password.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.new_password1.label_tag }}
+                        {{ form.new_password1 }}
+                        {% if form.new_password1.errors %}<div class="alert alert-danger mt-1">{{ form.new_password1.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.new_password2.label_tag }}
+                        {{ form.new_password2 }}
+                        {% if form.new_password2.errors %}<div class="alert alert-danger mt-1">{{ form.new_password2.errors }}</div>{% endif %}
+                    </div>
+                    
+                    <div class="modal-footer justify-content-end mt-4">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var modal = document.getElementById('editProfileModal');
+        if (modal) {
+            // Verifica si el formulario tiene errores al cargar la página
+            var formErrors = modal.querySelector('.alert-danger');
+            if (formErrors) {
+                var myModal = new bootstrap.Modal(modal);
+                myModal.show();
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -38,9 +38,9 @@
         </div>
     </div>
     <div class="mb-3 text-end">
-        <a href="{% url 'usuarios:crear_usuario' %}" class="btn btn-primary">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#crearUsuarioModal">
             <i class="fas fa-plus-circle"></i> Agregar Nuevo Usuario
-        </a>
+        </button>
     </div>
     {% if usuarios %}
     <div class="table-responsive">
@@ -52,6 +52,7 @@
                     <th>Email</th>
                     <th>Nombre Completo</th>
                     <th>Superusuario</th>
+                    <th>Staff</th>
                     <th>Estado</th>
                     <th>Fecha de Registro</th>
                     <th>Último Login</th>
@@ -79,6 +80,13 @@
                             Desactivo
                         {% endif %}
                     </td>
+                    <td>
+    {% if user.is_staff %}
+        Sí
+    {% else %}
+        No
+    {% endif %}
+</td>
                     <td>{{ user.date_joined|date:"d M Y H:i" }}</td>
                     <td>{{ user.last_login|default:"Nunca"|date:"d M Y H:i" }}</td>
                     <td>
@@ -125,7 +133,20 @@
     <p class="alert alert-info">No hay usuarios registrados.</p>
     {% endif %}
 </div>
-
+<div class="modal fade" id="crearUsuarioModal" tabindex="-1" aria-labelledby="crearUsuarioModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-ld">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="crearUsuarioModalLabel">Crear Nuevo Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="crearUserFormContent">
+                {# El formulario se cargará aquí dinámicamente #}
+                <p class="text-center text-muted">Cargando formulario...</p>
+            </div>
+        </div>
+    </div>
+</div>
 {# --- INICIO: Modal de Confirmación para Deshabilitar/Habilitar --- #}
 <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-labelledby="confirmActionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -250,6 +271,61 @@
                     console.error('Error al cargar el formulario:', error);
                     modalBody.innerHTML = '<p class="text-center text-danger">No se pudo cargar el formulario de edición.</p>';
                 });
+        });
+    }
+
+
+    // alta de usuario
+      var crearUsuarioModal = document.getElementById('crearUsuarioModal');
+    if (crearUsuarioModal) {
+        crearUsuarioModal.addEventListener('show.bs.modal', function () {
+            var modalBody = document.getElementById('crearUserFormContent');
+            var urlCreacion = "{% url 'usuarios:crear_usuario' %}";
+
+            // Cargar el formulario usando AJAX
+            fetch(urlCreacion, {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => {
+                modalBody.innerHTML = html;
+                
+                var form = modalBody.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault();
+                        
+                        fetch(form.action, {
+                            method: 'POST',
+                            body: new FormData(form),
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                            }
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                return response.text();
+                            }
+                        })
+                        .then(html => {
+                            if (html) {
+                                modalBody.innerHTML = html;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al enviar el formulario:', error);
+                        });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar el formulario:', error);
+                modalBody.innerHTML = '<p class="text-center text-danger">No se pudo cargar el formulario de creación.</p>';
+            });
         });
     }
 </script>

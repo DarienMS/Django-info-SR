@@ -160,8 +160,8 @@
                 <p id="modalMessage">¿Estás seguro de que quieres realizar esta acción?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Cancelar
+                <button type="button" class="btn btn-warning data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
                 </button>
                 <form id="actionForm" method="post" style="display: inline;">
                     {% csrf_token %}
@@ -174,6 +174,7 @@
     </div>
 </div>
 {% endblock contenido %}
+
 
 {% block extra_js %}
 <script>
@@ -193,15 +194,17 @@
             if (actionType === 'desactivar') {
                 modalTitle.textContent = 'Dar de Baja Receta';
                 modalMessage.textContent = `¿Estás seguro de que quieres dar de baja la receta "${recetaTitulo}" (ID: ${recetaId})? La receta ya no será visible para el público.`;
-                confirmButton.innerHTML = '<i class="fas fa-check me-1"></i> Sí, dar de baja';
+                confirmButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>';
                 confirmButton.className = 'btn btn-danger';
-                actionForm.action = `/Recetas/eliminar/${recetaId}/`;
+               
+                actionForm.action = `/Recetas/panel-admin-eliminar/${recetaId}/`;
             } else if (actionType === 'activar') {
                 modalTitle.textContent = 'Habilitar Receta';
                 modalMessage.textContent = `¿Estás seguro de que quieres habilitar la receta "${recetaTitulo}" (ID: ${recetaId})? La receta volverá a estar visible para el público.`;
-                confirmButton.innerHTML = '<i class="fas fa-check me-1"></i> Sí, habilitar';
+                confirmButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>';
                 confirmButton.className = 'btn btn-success';
-                actionForm.action = `/Recetas/habilitar/${recetaId}/`;
+                
+                actionForm.action = `/Recetas/receta/habilitar/${recetaId}/`;
             }
         });
     });

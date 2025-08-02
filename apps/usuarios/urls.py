@@ -18,4 +18,6 @@ path('mensajes/enviar/', views.MensajeCreateView.as_view(), name='enviar_mensaje
     path('mensajes/mis-mensajes/', views.MisMensajesListView.as_view(), name='mis_mensajes'),
      path('mensajes/admin/', views.MensajeAdminListView.as_view(), name='lista_mensajes_admin'),
      path('mensajes/admin/responder/', views.MensajeResponderView.as_view(), name='responder_mensaje_admin'),
+  path('perfil/', views.perfil_usuario_view, name='perfil'),
+  
 ]
