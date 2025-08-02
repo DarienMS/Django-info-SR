@@ -396,3 +396,21 @@ class ComentariosAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView
         context['usuarios'] = Usuario.objects.all()
         
         return context
+    
+class RecetaAdminDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Receta
+    template_name = 'recetas/receta_confirm_delete.html'
+    success_url = reverse_lazy('recetas:recetas_lista') 
+
+    def test_func(self):
+       
+        return self.request.user.is_superuser or self.request.user.is_staff
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.fecha_baja = timezone.now()
+        self.object.usuario_baja = request.user
+        self.object.save()
+
+        messages.success(self.request, f"La receta '{self.object.titulo}' ha sido dada de baja por el administrador.")
+        return redirect(self.success_url)

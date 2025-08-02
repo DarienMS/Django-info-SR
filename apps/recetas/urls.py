@@ -22,6 +22,6 @@ urlpatterns = [
     path('comentario/eliminar/<int:pk>/', views.ComentarioDeleteView.as_view(), name='comentario_eliminar'),
      path('panel-admin/', views.RecetasAdminListView.as_view(), name='recetas_lista'),
       path('panel-admin-comentarios/', views.ComentariosAdminListView.as_view(), name='lista_comentarios_admin'), # Nueva URL
-
+       path('panel-admin-eliminar/<int:pk>/', views.RecetaAdminDeleteView.as_view(), name='receta_admin_eliminar'),
     
 ]
