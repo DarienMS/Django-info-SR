@@ -1,5 +1,8 @@
-/* body {
-    background-color: #fff8e1; /* crema claro
+
+body {
+    background-color: #fff8e1; /* crema claro */
+     padding-top: 60px;
+
 }
 body nav {
 	background-color: #e2ceaf; /* gris claro 
@@ -38,22 +41,21 @@ nav a:hover {
 
 .bloque{
 	text-align: center;
-	padding: 100px;
+	padding: 50px;
 }
 
 .submenu{
 	font-size: 18px	;
 }
 
-/* Cambia el color de fondo del offcanvas */
 .offcanvas {
-    background-color: #fff8e1 !important; /* Cambia este color al que prefieras */
+    background-color: #fff8e1 !important; 
 }
 
-/* Opcional: cambia el color del texto dentro del offcanvas */
+
 .offcanvas .offcanvas-body, 
 .offcanvas .offcanvas-title {
-    color: #5d4037; /* Cambia este color al que prefieras */
+    color: #5d4037; 
 }
 
 .receta-detalle {
@@ -268,11 +270,11 @@ Esto hice para las imagenes */
 /* Pantallas pequeñas (ej. smartphones, hasta 767px de ancho) */
 @media (max-width: 767.98px) {
     .profile-img-container {
-        width: 120px; /* Reducir el tamaño del círculo para móviles */
+        width: 120px; 
         height: 120px;
-        margin-top: 1rem; /* Ajustar el margen superior si es necesario */
-        margin-bottom: 0.5rem; /* Ajustar el margen inferior */
-        border-width: 2px; /* Reducir el grosor del borde si el borde anterior es muy ancho */
+        margin-top: 1rem; 
+        margin-bottom: 0.5rem; 
+        border-width: 2px;  
     }
 
     .nosotros-card .card-title {
