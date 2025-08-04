@@ -102,9 +102,9 @@
                 {% if user.is_authenticated and user == receta.autor %}
                     <div class="mt-4 text-center">
                         <a href="{% url 'recetas:receta_editar' receta.pk %}" class="btn btn-warning me-2">Editar Receta</a>
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteRecetaModal">
+                        {% comment %} <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteRecetaModal">
                             Eliminar Receta
-                        </button>
+                        </button> {% endcomment %}
                     </div>
                 {% endif %}
             </div>
