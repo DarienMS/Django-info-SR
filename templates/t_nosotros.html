@@ -6,21 +6,27 @@
 {% block contenido %}
 <div class="container my-5">
     <h1 class="text-center mb-5 display-4">Conoce a Nuestro Equipo</h1>
-
+	  <p class="lead text-center mb-0">
+            Nos conocimos en el informatorio y formamos un gran equipo. Trabajamos con metodologías ágiles, utilizando Trello para la gestión del trabajo y Git para el control de versiones. Esta web está desarrollada con Django.
+        </p>
+        <p class="lead text-center mb-0">
+            A continuación, te presentamos a cada uno de nosotros y nuestras redes. Cualquier cosa contactanos.
+        </p>
+	</br>
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-4 justify-content-center">
       
         <div class="col">
             <div class="card h-100 nosotros-card shadow-sm">
                 <div class="profile-img-container"> 
-                    <img src="{% static 'img/adrian.jfif' %}" class="nosotros-img" alt="Foto de Miembro 1">
+                    <img src="{% static 'img/adrian.jfif' %}" class="nosotros-img" alt="Adri">
                 </div>
                 <div class="card-body text-center">
                     <h5 class="card-title">Adrián Navarro</h5> 
                     <p class="card-text text-muted">Desarrollador Full Stack</p> 
                     <p class="card-text">
-                      Soy Programador Full Stack y Analista de datos, soy de Barranqueras-Chaco,recibido de la UNNE en la carrera de Lic en Sistemas.No me pidan hacer Deploy los viernes,los viernes es de Cerveza.
+                      Soy Programador Full Stack y Analista de datos, soy de Barranqueras-Chaco,recibido de la UNNE en la carrera de Lic en Sistema. Descarga mi Cv y si necesitas soluciones informaticas llamame.No me pidan hacer Deploy los viernes,los viernes es de Cerveza.
                     </p>
-                    <a href="{% static 'cv/cv_miembro1.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
+                    <a href="{% static 'cv/CV ADRIAN.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
                         Descargar CV <i class="fas fa-download"></i>
                     </a>
                     <div class="social-icons mt-3">
@@ -43,10 +49,11 @@
             <div class="card h-100 nosotros-card shadow-sm">
                 <div class="profile-img-container"> 
                     <!-- tu imagen aca -->
-                    <img src="{% static 'img/Gera.jpeg' %}" class="nosotros-img" alt="Foto de Miembro 2">
+                    <img src="{% static 'img/Gera.jpeg' %}" class="nosotros-img" alt="gera">
                 </div>
                 <div class="card-body text-center">
                     <h5 class="card-title">Gerardo Vollmer</h5>
+					<p class="card-text text-muted">Tecnico informatico</p> 
                     <p class="card-text text-muted">Soy tecnico informatico, actualmente me encuentro tabajando en mi propio negocio y cursando el INFORMATORIO CHACO, en el cual busco 
                         aprender mas y dedicarme a programacion. soy de Charata Chaco.
                     </p>
@@ -79,7 +86,7 @@
         <div class="col">
             <div class="card h-100 nosotros-card shadow-sm">
                 <div class="profile-img-container"> 
-                    <img src="{% static 'img/Darien-img.jpg' %}" class="nosotros-img" alt="Foto de Miembro 3">
+                    <img src="{% static 'img/Darien-img.jpg' %}" class="nosotros-img" alt="darien">
                 </div>
                 <div class="card-body text-center">
                     <h5 class="card-title">Darién Sevchenko</h5>
@@ -109,25 +116,25 @@
         <div class="col">
             <div class="card h-100 nosotros-card shadow-sm">
                 <div class="profile-img-container"> 
-                    <img src="{% static 'img/miembro4.jpg' %}" class="nosotros-img" alt="Foto de Miembro 4">
+                    <img src="{% static 'img/elian.jpg' %}" class="nosotros-img" alt="elian">
                 </div>
                 <div class="card-body text-center">
-                    <h5 class="card-title"></h5>
-                    <p class="card-text text-muted"></p>
+                    <h5 class="card-title">Elian Sevchenko</h5>
+                    <p class="card-text text-muted">Desarrollador Web</p>
                     <p class="card-text">
-                       
+                       Soy estudiante en el Informatorio, con formación y experiencia práctica en desarrollo web y software. Me apasiona la programación y estoy en constante búsqueda de nuevos desafíos que me permitan crecer tanto a nivel técnico como personal.
                     </p>
-                    <a href="{% static 'cv/cv_miembro4.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
+                    <a href="{% static 'cv/CV-Elian Sevchenko.pdf' %}" class="btn btn-primary btn-sm mt-2" download>
                         Descargar CV <i class="fas fa-download"></i>
                     </a>
                     <div class="social-icons mt-3">
                         <a href="https://www.linkedin.com/in/nombre-del-miembro4/" target="_blank" class="mx-2 text-decoration-none">
                             <i class="fab fa-linkedin fa-2x"></i>
                         </a>
-                        <a href="https://www.instagram.com/usuario_miembro4/" target="_blank" class="mx-2 text-decoration-none">
+                        <a href="https://www.instagram.com/" target="_blank" class="mx-2 text-decoration-none">
                             <i class="fab fa-instagram fa-2x"></i>
                         </a>
-                        <a href="https://wa.me/XXXXXXXXXXX" target="_blank" class="mx-2 text-decoration-none">
+                        <a href="https://wa.me/+54 9 3731 51-5419" target="_blank" class="mx-2 text-decoration-none">
                             <i class="fab fa-whatsapp fa-2x"></i>
                         </a>
                     </div>

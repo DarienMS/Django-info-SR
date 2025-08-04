@@ -12,7 +12,7 @@
             
             {# Card de los botones de acción #}
             <div class="card shadow p-4 mb-4" style="background-color: #fce4c2;">
-                <h5 class="mb-4 text-center">Gestión de Recetas</h5>
+                {% comment %} <h5 class="mb-4 text-center">Gestión de Recetas</h5> {% endcomment %}
                 <div class="d-grid gap-2">
                     {% if user.is_authenticated %}
                         <a href="{% url 'recetas:agregar_receta' %}" class="btn btn-primary">
