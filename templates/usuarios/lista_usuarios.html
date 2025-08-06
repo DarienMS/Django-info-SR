@@ -73,6 +73,14 @@
                             No
                         {% endif %}
                     </td>
+                                     <td>
+    {% if user.is_staff %}
+        Sí
+    {% else %}
+        No
+    {% endif %}
+</td>
+    
                     <td>
                         {% if user.is_active %}
                             Activo
@@ -80,14 +88,7 @@
                             Desactivo
                         {% endif %}
                     </td>
-                    <td>
-    {% if user.is_staff %}
-        Sí
-    {% else %}
-        No
-    {% endif %}
-</td>
-                    <td>{{ user.date_joined|date:"d M Y H:i" }}</td>
+                   <td>{{ user.date_joined|date:"d M Y H:i" }}</td>
                     <td>{{ user.last_login|default:"Nunca"|date:"d M Y H:i" }}</td>
                     <td>
                         {# Botón Editar que abrirá el modal #}
