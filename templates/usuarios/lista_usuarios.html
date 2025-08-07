@@ -171,7 +171,7 @@
 </div>
 {# --- FIN: Modal de Confirmación --- #}
 
-{# --- INICIO: Modal para Editar Usuario (Carga dinámica) --- #}
+
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -210,13 +210,13 @@
             if (actionType === 'desactivar') {
                 modalTitle.textContent = 'Deshabilitar Usuario';
                 modalMessage.textContent = `¿Estás seguro de que quieres deshabilitar al usuario "${username}" (ID: ${userId})? Su estado cambiará a "Desactivo".`;
-                confirmButton.textContent = 'Deshabilitar';
+               confirmButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>';
                 confirmButton.className = 'btn btn-danger';
                 actionForm.action = `/Usuario/desactivar/${userId}/`;
             } else if (actionType === 'activar') {
                 modalTitle.textContent = 'Habilitar Usuario';
                 modalMessage.textContent = `¿Estás seguro de que quieres habilitar al usuario "${username}" (ID: ${userId})? Su estado cambiará a "Activo".`;
-                confirmButton.textContent = 'Habilitar';
+                 confirmButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>';
                 confirmButton.className = 'btn btn-success';
                 actionForm.action = `/Usuario/activar/${userId}/`;
             }
