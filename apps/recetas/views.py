@@ -28,23 +28,26 @@ class RecetaListView(ListView):
     model = Receta
     template_name = 'recetas/listar.html'
     context_object_name = 'recetas'
-    ordering = ['-fecha'] 
+    ordering = ['-fecha']
     paginate_by = 10
 
     def get_queryset(self):
         queryset = Receta.objects.filter(fecha_baja__isnull=True)
-        
+
+        # Filtro de búsqueda por título o cuerpo
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(Q(titulo__icontains=query) | Q(cuerpo__icontains=query))
+
         # Filtro por categoría
         categoria_id = self.request.GET.get('id')
         if categoria_id:
             try:
                 queryset = queryset.filter(categoria_receta__pk=categoria_id)
-            except ValueError:
+            except (ValueError, Categoria.DoesNotExist):
                 pass
-            except Categoria.DoesNotExist:
-                pass
-
-        # Nuevo filtro: Rango de fechas
+        
+        # Filtro por rango de fechas
         fecha_inicio_str = self.request.GET.get('fecha_inicio')
         fecha_fin_str = self.request.GET.get('fecha_fin')
 
@@ -64,23 +67,21 @@ class RecetaListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
+      
         context['categorias'] = Categoria.objects.all().order_by('nombre')
-        
-        # Obtener los valores de los filtros para mantenerlos en el formulario
-        categoria_id = self.request.GET.get('id')
-        fecha_inicio_str = self.request.GET.get('fecha_inicio', '')
-        fecha_fin_str = self.request.GET.get('fecha_fin', '')
-        
-        if categoria_id:
+        categoria_id_str = self.request.GET.get('id', '')
+        if categoria_id_str:
             try:
-                categoria = Categoria.objects.get(pk=categoria_id)
-                context['categoria_actual'] = categoria 
+                categoria = Categoria.objects.get(pk=categoria_id_str)
+                context['categoria_actual'] = categoria
             except Categoria.DoesNotExist:
-                pass 
+                context['categoria_actual'] = None
+        else:
+            context['categoria_actual'] = None
         
-        # Añadir los valores de los nuevos filtros al contexto
-        context['fecha_inicio_actual'] = fecha_inicio_str
-        context['fecha_fin_actual'] = fecha_fin_str
+        context['fecha_inicio_actual'] = self.request.GET.get('fecha_inicio', '')
+        context['fecha_fin_actual'] = self.request.GET.get('fecha_fin', '')
+        context['busqueda_actual'] = self.request.GET.get('q', '')
         
         return context
 
@@ -92,18 +93,17 @@ class MisRecetasListView(LoginRequiredMixin, ListView):
     paginate_by = 10
     
     def dispatch(self, request, *args, **kwargs):
-        # CORRECTO: Ahora cuenta TODAS las recetas del usuario, sin importar si tienen fecha_baja.
+    
         user_recipes_count = Receta.objects.filter(autor=request.user).count()
-        
-        # Si el usuario no tiene ninguna receta (ni activa ni de baja), lo redirige.
+
         if user_recipes_count == 0:
             messages.info(request, "Aún no tienes recetas publicadas. ¡Crea tu primera receta para verla aquí!")
             return redirect(reverse_lazy('recetas:listar'))
         
-        # Si el usuario tiene al menos una receta, permite el acceso a la vista.
+     
         return super().dispatch(request, *args, **kwargs) 
     def get_queryset(self):
-        # El queryset inicial se filtra por el autor.
+    
         queryset = Receta.objects.filter(autor=self.request.user)
 
         # Filtro por estado (activas/baja)
@@ -112,9 +112,7 @@ class MisRecetasListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(fecha_baja__isnull=False)
         elif estado == 'activas':
             queryset = queryset.filter(fecha_baja__isnull=True)
-        # Si el 'estado' no está o está vacío, no se aplica este filtro,
-        # por lo que el queryset inicial (todas las recetas del usuario) se mantiene.
-
+        
         # Filtro por categoría
         categoria_id = self.request.GET.get('id')
         if categoria_id:
@@ -149,7 +147,7 @@ class MisRecetasListView(LoginRequiredMixin, ListView):
         
         context['categorias'] = Categoria.objects.all().order_by('nombre')
         
-        # Se guarda el valor del filtro para que la plantilla lo muestre como seleccionado
+       
         context['estado_actual'] = self.request.GET.get('estado', '') 
         context['categoria_actual'] = self.request.GET.get('id', '')
         context['fecha_inicio_actual'] = self.request.GET.get('fecha_inicio', '')
@@ -157,7 +155,7 @@ class MisRecetasListView(LoginRequiredMixin, ListView):
         context['busqueda_actual'] = self.request.GET.get('q', '')
         
         return context
-# Vista de detalle de una receta
+
 class RecetaDetailView(DetailView):
     model = Receta
     template_name = 'recetas/detalle.html' 
@@ -273,9 +271,9 @@ class RecetaUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 
-class RecetaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): # <<-- ¡CAMBIO CRÍTICO AQUÍ!
+class RecetaDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView): 
     model = Receta
-    template_name = 'recetas/receta_confirm_delete.html' # Puedes comentarla si usas el modal customizado
+    template_name = 'recetas/receta_confirm_delete.html' 
     success_url = reverse_lazy('recetas:mis_recetas')
 
     
@@ -307,7 +305,7 @@ class RecetaReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         receta = self.get_object()
-        # Modifica esta línea para permitir al autor o a un superusuario
+      
         return receta.autor == self.request.user or self.request.user.is_superuser
 
     def post(self, request, *args, **kwargs):
@@ -320,14 +318,14 @@ class RecetaReactivateView(LoginRequiredMixin, UserPassesTestMixin, View):
         
         # Redirigir al panel de administración si el usuario es un superusuario
         if request.user.is_superuser:
-            # Asegúrate de usar el nombre correcto de tu URL de panel
+
             return redirect(reverse_lazy('recetas:recetas_lista')) 
         
-        # Si no es superusuario, redirige a 'mis_recetas'
+
         return redirect(self.success_url)
 
     def get(self, request, *args, **kwargs):
-        # Esta redirección está bien si el usuario no tiene acceso a la vista por GET.
+       
         return redirect(self.success_url)
     
 class ComentarioUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
