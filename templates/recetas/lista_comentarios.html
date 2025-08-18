@@ -122,13 +122,13 @@
                 <p id="deleteModalMessage">¿Estás seguro de que quieres eliminar este comentario?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Cancelar
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> 
                 </button>
                 <form id="deleteCommentForm" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger" id="confirmDeleteButton">
-                        <i class="fas fa-trash-alt me-1"></i> Eliminar
+                        <i class="fas fa-trash-alt me-1"></i> 
                     </button>
                 </form>
             </div>

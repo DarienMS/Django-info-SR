@@ -197,10 +197,14 @@
                 <p class="mt-2 text-muted small">Esta acción marcará la receta como inactiva. No se eliminará permanentemente de la base de datos.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                 <i class="fas fa-xmark"></i>
+                </button>
                 <form id="deleteForm" method="post" action="">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Sí, dar de baja</button>
+                  <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i>
+                    </button>
                 </form>
             </div>
         </div>

@@ -160,7 +160,9 @@
                 <p id="modalMessage">¿Estás seguro de que quieres realizar esta acción?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+               <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                 <i class="fas fa-times"></i>
+                </button>
                 <form id="actionForm" method="post" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn" id="confirmButton">Confirmar</button>
@@ -210,13 +212,13 @@
             if (actionType === 'desactivar') {
                 modalTitle.textContent = 'Deshabilitar Usuario';
                 modalMessage.textContent = `¿Estás seguro de que quieres deshabilitar al usuario "${username}" (ID: ${userId})? Su estado cambiará a "Desactivo".`;
-               confirmButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>';
+               confirmButton.innerHTML = '<i class="fas fa-trash-alt me-1"></i>';
                 confirmButton.className = 'btn btn-danger';
                 actionForm.action = `/Usuario/desactivar/${userId}/`;
             } else if (actionType === 'activar') {
                 modalTitle.textContent = 'Habilitar Usuario';
                 modalMessage.textContent = `¿Estás seguro de que quieres habilitar al usuario "${username}" (ID: ${userId})? Su estado cambiará a "Activo".`;
-                 confirmButton.innerHTML = '<i class="fas fa-check-circle me-1"></i>';
+                 confirmButton.innerHTML = '<i class="fas fa-trash-alt me-1"></i>';
                 confirmButton.className = 'btn btn-success';
                 actionForm.action = `/Usuario/activar/${userId}/`;
             }
